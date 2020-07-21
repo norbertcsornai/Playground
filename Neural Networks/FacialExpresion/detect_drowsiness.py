@@ -12,7 +12,7 @@ import numpy as np
 import datetime
 from model import FacialExpressionModel
 
-model = FacialExpressionModel("model_filter_V2_SGD_100.h5.h5")
+model = FacialExpressionModel("model_filter_V2_SGD_100.h5")
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
 
 # FPS counter
