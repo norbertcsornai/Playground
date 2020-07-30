@@ -59,13 +59,16 @@ void PlayGame()
 					cout << "Input Error! Please try again." << endl;
 					wrongnumber = true;
 				}
-				// if not display again options and start over
+				// if not, display again options and start over
 				if (!count(guesses.begin(), guesses.end(), Player1Guess))
 				{
 					cout << "Please enter again ";
 					for (int i = 0; i < guesses.size(); i++)
 					{
-						cout << guesses[i] << ", ";
+						if (i == guesses.size() - 1)
+							cout << guesses[i] << " ";
+						else
+							cout << guesses[i] << ", ";
 					}
 					cout << " : " << endl;
 
