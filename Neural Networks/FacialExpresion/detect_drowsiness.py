@@ -13,7 +13,6 @@ import datetime
 from model import FacialExpressionModel
 
 model = FacialExpressionModel("model_filter_V2_SGD_100.h5")
-face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
 
 # FPS counter
 class FPS:
@@ -180,7 +179,7 @@ while True:
         # draw the computed eye aspect ratio on the frame to help
         # with debugging and setting the correct eye aspect ratio
         # thresholds and frame counters
-        cv2.putText(frame, "EAR: {:.2f}".format(ear), (300, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+        cv2.putText(frame, "ROA: {:.2f}".format(ear), (300, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
 
     # show the frame
     cv2.imshow("Frame", frame)

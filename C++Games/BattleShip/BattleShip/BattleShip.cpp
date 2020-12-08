@@ -638,7 +638,7 @@ PlayerType GetPlayer2Type()
 {
 	const int validInputs[2] = { 1, 2 };
 
-	int input = GetInteger("Who would you like to play against?\n. 1. Huma\n2. AI\n\nWhat is your choice? ", INPUT_ERROR_STRING, validInputs, 2);
+	int input = GetInteger("Who would you like to play against?\n1. Human\n2. AI\n\nWhat is your choice? ", INPUT_ERROR_STRING, validInputs, 2);
 
 	if (input == 1)
 	{
