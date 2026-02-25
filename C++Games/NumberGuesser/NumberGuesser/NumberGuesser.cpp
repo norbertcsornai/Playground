@@ -1,151 +1,226 @@
-#include <iostream>
-#include <cmath>
 #include <cctype>
-#include <stdlib.h>
-#include <ctime>
-using namespace std;
+#include <iostream>
+#include <limits>
+#include <random>
+#include <string>
 
-void PlayGame();
-bool WantToPlayAgain();
-bool IsGameOver(int secretNumber, int numberOfTries, int guess);
-int GetGuess(int numberOfTries);
-void DisplayResult(int secretNumber, int numberOfTries);
-
-const int IGNORE_CHARS = 256;
-
-int main()
+namespace
 {
-	// main function from which we play the game until 
-	do
-	{
-		PlayGame();
-	} while (WantToPlayAgain());
+struct GameSettings
+{
+	std::string name;
+	int minValue;
+	int maxValue;
+	int tries;
+};
 
-	return 0;
+void ClearInputLine()
+{
+	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 }
 
-void PlayGame()
+int CalculateTryLimit(int minValue, int maxValue)
 {
-	// uper bound of the range of possible numbers to guess
-	const int UPPER_BOUND = 100;
+	const int rangeSize = (maxValue - minValue) + 1; // inclusive range
+	int tries = 0;
+	int coveredValues = 1;
 
-	// variable for secret number to guess -> from 0 to 100
-	int secretNumber = rand() % UPPER_BOUND;
-
-	// variable that stores the number of guesses the player has left
-	int numberOfTries = ceil(log2(UPPER_BOUND));
-
-	// variable that will store the players guess
-	int guess = 0;
-
-	cout << "The range of the number is between 0 and "<< UPPER_BOUND << endl;
-
-	do
+	while (coveredValues < rangeSize)
 	{
-		// get the guess from the player
-		guess = GetGuess(numberOfTries);
+		coveredValues *= 2;
+		++tries;
+	}
 
-		// if not guessed the we substract from the number of tries
-		if (guess != secretNumber)
-		{
-			numberOfTries--;
-			
-			if (guess > secretNumber)
-			{
-				cout << "Guess was too high!" << endl;
-			}
-			else
-			{
-				cout << "Guess was too low!" << endl;
-			}
-		}
-			
-
-	} while (!IsGameOver(secretNumber, numberOfTries, guess));
-
-	DisplayResult(secretNumber, numberOfTries);
+	return (tries > 0) ? tries : 1;
 }
 
-// ask the player if play again or not. Choices are Y for yes and N for no
-bool WantToPlayAgain()
+int ReadInt(const std::string& prompt)
 {
-	char input;
-	bool failure;
-	do
+	while (true)
 	{
-		failure = false;
-
-		cout << "Would you like to play again? (y/n) : ";
-		cin >> input;
-
-		if (cin.fail())
+		std::string line;
+		std::cout << prompt;
+		if (!std::getline(std::cin, line))
 		{
-			cin.clear();
-			cin.ignore(IGNORE_CHARS, '\n');
-			cout << "Input Error! Please try again." << endl;
-			failure = true;
-		}
-		else
-		{
-			cin.ignore(IGNORE_CHARS, '\n');
-			input = tolower(input);
+			std::cin.clear();
+			std::cout << "Input error. Please enter a whole number.\n";
+			continue;
 		}
 
-		// only accept y or n
-		if (input != 'y' && input != 'n')
+		size_t parsePos = 0;
+		int value = 0;
+
+		try
 		{
-			cout << "Please enter Y (Yes) or N (No)" << endl;
-			failure = true;
+			value = std::stoi(line, &parsePos);
+		}
+		catch (...)
+		{
+			std::cout << "Input error. Please enter a whole number.\n";
+			continue;
 		}
 
-	} while (failure);
+		while (parsePos < line.size() &&
+			std::isspace(static_cast<unsigned char>(line[parsePos])))
+		{
+			++parsePos;
+		}
 
-	// clear the screen
-	system("CLS");
-	return input == 'y';
+		if (parsePos != line.size())
+		{
+			std::cout << "Input error. Please enter a whole number.\n";
+			continue;
+		}
+
+		return value;
+	}
 }
 
-// game over when number is guessed or out of tries
-bool IsGameOver(int secretNumber, int numberOfTries, int guess)
+GameSettings SelectDifficulty()
 {
-	return secretNumber == guess || numberOfTries <= 0;
-}
-
-int GetGuess(int numberOfTries)
-{
-	
-	int guess;
-	bool failure;
-	
-	do
+	while (true)
 	{
-		failure = false;
-		cout << "Please enter your guess (number of guesses left: " << numberOfTries << "): ";
-		cin >> guess;
+		std::cout << "\nChoose a difficulty:\n";
+		std::cout << "1) Easy   (0 - 50)\n";
+		std::cout << "2) Medium (0 - 100)\n";
+		std::cout << "3) Hard   (0 - 500)\n";
 
-		// check that only numbers are inputed
-		if(cin.fail())
+		const int choice = ReadInt("Enter 1, 2, or 3: ");
+
+		if (choice == 1)
 		{
-			cin.clear();
-			cin.ignore(IGNORE_CHARS, '\n');
-			cout << "Input error! Please try again." << endl;
-			failure = true;
+			return {"Easy", 0, 50, CalculateTryLimit(0, 50)};
+		}
+		if (choice == 2)
+		{
+			return {"Medium", 0, 100, CalculateTryLimit(0, 100)};
+		}
+		if (choice == 3)
+		{
+			return {"Hard", 0, 500, CalculateTryLimit(0, 500)};
 		}
 
-	} while (failure);
-	return guess;
+		std::cout << "Invalid choice. Please select 1, 2, or 3.\n";
+	}
 }
 
-// prompt if number is  guessed or if out of guesses and game is lost
-void DisplayResult(int secretNumber, int numberOfTries)
+int GetGuess(int minValue, int maxValue, int triesLeft)
 {
-	if (numberOfTries > 0)
+	while (true)
 	{
-		cout << "You guessed it! Number is :" << secretNumber << endl;
+		const int guess = ReadInt(
+			"Enter your guess (" + std::to_string(minValue) + " - " +
+			std::to_string(maxValue) + "), tries left: " + std::to_string(triesLeft) + ": ");
+
+		if (guess < minValue || guess > maxValue)
+		{
+			std::cout << "Out of range. Please enter a number between "
+				<< minValue << " and " << maxValue << ".\n";
+			continue;
+		}
+
+		return guess;
+	}
+}
+
+void DisplayResult(int secretNumber, bool guessedCorrectly, int triesLeft)
+{
+	if (guessedCorrectly)
+	{
+		std::cout << "You guessed it! The number was " << secretNumber
+			<< ". Tries remaining: " << triesLeft << "\n";
 	}
 	else
 	{
-		cout << "You didn't guessed it! Number is:" << secretNumber << endl;
+		std::cout << "Out of tries. The number was " << secretNumber << ".\n";
+	}
+}
+
+bool WantToPlayAgain()
+{
+	char input = '\0';
+
+	while (true)
+	{
+		std::cout << "\nWould you like to play again? (y/n): ";
+		std::cin >> input;
+
+		if (std::cin.fail())
+		{
+			std::cin.clear();
+			ClearInputLine();
+			std::cout << "Input error. Please try again.\n";
+			continue;
+		}
+
+		ClearInputLine();
+		input = static_cast<char>(std::tolower(static_cast<unsigned char>(input)));
+
+		if (input == 'y')
+		{
+			return true;
+		}
+		if (input == 'n')
+		{
+			return false;
+		}
+
+		std::cout << "Please enter Y (yes) or N (no).\n";
+	}
+}
+
+void PlayGame(std::mt19937& rng)
+{
+	const GameSettings settings = SelectDifficulty();
+	const std::uniform_int_distribution<int> dist(settings.minValue, settings.maxValue);
+	const int secretNumber = dist(rng);
+
+	int triesLeft = settings.tries;
+	bool guessedCorrectly = false;
+
+	std::cout << "\nDifficulty: " << settings.name << '\n';
+	std::cout << "Guess the number between " << settings.minValue
+		<< " and " << settings.maxValue << ".\n";
+	std::cout << "You have " << triesLeft << " tries.\n";
+
+	while (triesLeft > 0)
+	{
+		const int guess = GetGuess(settings.minValue, settings.maxValue, triesLeft);
+
+		if (guess == secretNumber)
+		{
+			guessedCorrectly = true;
+			break;
+		}
+
+		--triesLeft;
+
+		if (triesLeft > 0)
+		{
+			if (guess > secretNumber)
+			{
+				std::cout << "Too high!\n";
+			}
+			else
+			{
+				std::cout << "Too low!\n";
+			}
+		}
 	}
 
+	DisplayResult(secretNumber, guessedCorrectly, triesLeft);
+}
+} // namespace
+
+int main()
+{
+	std::random_device rd;
+	std::mt19937 rng(rd());
+
+	do
+	{
+		PlayGame(rng);
+	} while (WantToPlayAgain());
+
+	return 0;
 }
