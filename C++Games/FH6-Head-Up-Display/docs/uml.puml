@@ -1,0 +1,304 @@
+@startuml
+title FH6 Head-Up Display - Design Class Diagram
+
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam linetype ortho
+
+package "Application" {
+  class HudApplication {
+    -running: bool
+    -lastFrameTime: TimePoint
+    +initialize(): bool
+    +run(): void
+    +shutdown(): void
+    -processFrame(): void
+    -enterIdleMode(): void
+  }
+
+  class GameWindowTracker {
+    -targetProcessName: string
+    -gameWindow: WindowHandle
+    +findGameWindow(): optional<WindowInfo>
+    +isGameRunning(): bool
+    +isGameVisible(): bool
+    +getActiveDisplay(): DisplayInfo
+    +refresh(): void
+  }
+}
+
+package "Frame Acquisition" {
+  interface IFrameCapture {
+    +start(display: DisplayInfo): bool
+    +captureFrame(): optional<Frame>
+    +stop(): void
+    +isAvailable(): bool
+  }
+
+  class DesktopFrameCapture {
+    -display: DisplayInfo
+    -captureRateLimitFps: int
+    +start(display: DisplayInfo): bool
+    +captureFrame(): optional<Frame>
+    +stop(): void
+    +isAvailable(): bool
+    +handleDisplayChanged(display: DisplayInfo): void
+  }
+
+  class Frame {
+    +width: int
+    +height: int
+    +timestamp: TimePoint
+    +pixels: PixelBuffer
+    +crop(region: Rect): FrameRegion
+  }
+
+  class FrameRegion {
+    +bounds: Rect
+    +pixels: PixelBufferView
+    +averageColor(): Color
+  }
+}
+
+package "Detection" {
+  class GearDetector {
+    -gearRegion: Rect
+    -confidenceThreshold: float
+    +setRegion(region: Rect): void
+    +detectGear(frame: Frame): GearDetectionResult
+    -extractGearRegion(frame: Frame): FrameRegion
+    -recognizeGear(region: FrameRegion): GearValue
+  }
+
+  class GearColorClassifier {
+    -whiteThreshold: ColorThreshold
+    -redThreshold: ColorThreshold
+    -confidenceThreshold: float
+    +classify(region: FrameRegion): GearColorState
+    +updateThresholds(thresholds: ColorThresholds): void
+    -calculateConfidence(region: FrameRegion, target: ColorThreshold): float
+  }
+
+  class CalibrationService {
+    -currentRegion: Rect
+    +autoLocateGearRegion(frame: Frame): optional<Rect>
+    +setManualRegion(region: Rect): void
+    +getGearRegion(): Rect
+    +resetToDefaults(): void
+  }
+
+  class GearDetectionResult {
+    +value: GearValue
+    +colorState: GearColorState
+    +confidence: float
+    +region: Rect
+    +isConfident(): bool
+  }
+}
+
+package "Alert Logic" {
+  class ShiftAlertController {
+    -previousColorState: GearColorState
+    -alertActiveUntil: TimePoint
+    -arrowDurationMs: int
+    +update(result: GearDetectionResult, now: TimePoint): ShiftAlertState
+    +reset(): void
+    +isAlertActive(now: TimePoint): bool
+    -isWhiteToRedTransition(current: GearColorState): bool
+  }
+
+  class ShiftAlertState {
+    +active: bool
+    +triggeredThisFrame: bool
+    +expiresAt: TimePoint
+  }
+}
+
+package "Overlay" {
+  class OverlayWindow {
+    -arrowSize: Size
+    -targetDisplay: DisplayInfo
+    -clickThrough: bool
+    +create(display: DisplayInfo): bool
+    +showArrow(): void
+    +hideArrow(): void
+    +centerOnDisplay(display: DisplayInfo): void
+    +ensureClickThrough(): void
+    +destroy(): void
+  }
+
+  class ArrowRenderer {
+    -color: Color
+    -size: Size
+    +render(target: OverlaySurface): void
+    +setColor(color: Color): void
+    +setSize(size: Size): void
+  }
+}
+
+package "Configuration and Diagnostics" {
+  class AppConfig {
+    +gearRegion: Rect
+    +colorThresholds: ColorThresholds
+    +arrowDurationMs: int
+    +arrowSize: Size
+    +targetDisplayId: string
+    +captureRateLimitFps: int
+    +diagnosticsEnabled: bool
+  }
+
+  class ConfigStore {
+    -configPath: Path
+    +load(): AppConfig
+    +save(config: AppConfig): void
+    +restoreDefaults(): AppConfig
+  }
+
+  class DiagnosticsService {
+    -enabled: bool
+    +setEnabled(enabled: bool): void
+    +reportGameDetected(detected: bool): void
+    +reportFrameStatus(status: FrameStatus): void
+    +reportDetection(result: GearDetectionResult): void
+    +reportOverlayStatus(status: OverlayStatus): void
+    +log(message: string): void
+  }
+}
+
+package "Shared Types" {
+  enum GearColorState {
+    White
+    Red
+    Unknown
+  }
+
+  enum GearValue {
+    Reverse
+    Neutral
+    First
+    Second
+    Third
+    Fourth
+    Fifth
+    Sixth
+    Seventh
+    Eighth
+    Ninth
+    Tenth
+    Unknown
+  }
+
+  class Rect {
+    +x: int
+    +y: int
+    +width: int
+    +height: int
+  }
+
+  class Size {
+    +width: int
+    +height: int
+  }
+
+  class DisplayInfo {
+    +id: string
+    +bounds: Rect
+    +dpiScale: float
+    +isHdrEnabled: bool
+  }
+
+  class WindowInfo {
+    +handle: WindowHandle
+    +title: string
+    +bounds: Rect
+    +display: DisplayInfo
+  }
+
+  class ColorThreshold
+  class ColorThresholds
+  class Color
+  class PixelBuffer
+  class PixelBufferView
+  class OverlaySurface
+  class TimePoint
+  class Path
+  class WindowHandle
+  class FrameStatus
+  class OverlayStatus
+}
+
+HudApplication *-- GameWindowTracker
+HudApplication *-- IFrameCapture
+HudApplication *-- GearDetector
+HudApplication *-- GearColorClassifier
+HudApplication *-- ShiftAlertController
+HudApplication *-- OverlayWindow
+HudApplication *-- ConfigStore
+HudApplication *-- DiagnosticsService
+HudApplication --> AppConfig
+
+IFrameCapture <|.. DesktopFrameCapture
+IFrameCapture --> Frame
+Frame --> FrameRegion
+
+GameWindowTracker --> WindowInfo
+WindowInfo --> DisplayInfo
+WindowInfo --> Rect
+DisplayInfo --> Rect
+
+GearDetector --> CalibrationService
+GearDetector --> GearDetectionResult
+GearDetector --> Frame
+GearDetector --> FrameRegion
+GearDetectionResult --> GearValue
+GearDetectionResult --> GearColorState
+GearDetectionResult --> Rect
+
+GearColorClassifier --> GearColorState
+GearColorClassifier --> FrameRegion
+GearColorClassifier --> ColorThresholds
+GearColorClassifier --> ColorThreshold
+
+CalibrationService --> Rect
+CalibrationService --> Frame
+
+ShiftAlertController --> GearDetectionResult
+ShiftAlertController --> ShiftAlertState
+ShiftAlertController --> GearColorState
+
+OverlayWindow *-- ArrowRenderer
+OverlayWindow --> DisplayInfo
+OverlayWindow --> Size
+ArrowRenderer --> OverlaySurface
+ArrowRenderer --> Color
+ArrowRenderer --> Size
+
+ConfigStore --> AppConfig
+AppConfig --> Rect
+AppConfig --> Size
+AppConfig --> ColorThresholds
+
+DiagnosticsService --> GearDetectionResult
+DiagnosticsService --> FrameStatus
+DiagnosticsService --> OverlayStatus
+
+note right of OverlayWindow
+  Overlay must be transparent,
+  topmost, and click-through so
+  the game keeps focus and input.
+end note
+
+note right of ShiftAlertController
+  Triggers only on confirmed
+  White -> Red transitions and
+  suppresses repeated triggers
+  while the gear remains Red.
+end note
+
+note bottom of AppConfig
+  Default arrow size:
+  width = 50 px
+  height = 100 px
+end note
+
+@enduml

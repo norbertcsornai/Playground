@@ -1,0 +1,12 @@
+build/
+build-*/
+Testing/
+.vs/
+.vscode/
+out/
+analysis_frames/
+*.user
+*.suo
+*.vcxproj.user
+*.mp4
+fh6-hud-config.ini
