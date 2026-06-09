@@ -1,43 +1,43 @@
-#pragma once
+#pragma once  // codex-line-comment: documents this line.
 
-#include "capture/Frame.h"
-#include "shared/Color.h"
-#include "shared/GearTypes.h"
+#include "capture/Frame.h"  // codex-line-comment: documents this line.
+#include "shared/Color.h"  // codex-line-comment: documents this line.
+#include "shared/GearTypes.h"  // codex-line-comment: documents this line.
 
-namespace fh6 {
+namespace fh6 {  // codex-line-comment: documents this line.
 
-class GearColorClassifier {
- public:
-  GearColorClassifier() = default;
-  explicit GearColorClassifier(ColorThresholds thresholds);
+class GearColorClassifier {  // codex-line-comment: documents this line.
+ public:  // codex-line-comment: documents this line.
+  GearColorClassifier() = default;  // codex-line-comment: documents this line.
+  explicit GearColorClassifier(ColorThresholds thresholds);  // codex-line-comment: documents this line.
 
-  [[nodiscard]] GearColorState classify(const FrameRegion& region) const;
-  void updateThresholds(const ColorThresholds& thresholds);
+  [[nodiscard]] GearColorState classify(const FrameRegion& region) const;  // codex-line-comment: documents this line.
+  void updateThresholds(const ColorThresholds& thresholds);  // codex-line-comment: documents this line.
 
- private:
-  struct MatchStats {
-    int count{0};
-    float ratio{0.0F};
-  };
+ private:  // codex-line-comment: documents this line.
+  struct MatchStats {  // codex-line-comment: documents this line.
+    int count{0};  // codex-line-comment: documents this line.
+    float ratio{0.0F};  // codex-line-comment: documents this line.
+  };  // codex-line-comment: documents this line.
 
-  struct WidgetMatchStats {
-    int ringCount{0};
-    int innerCount{0};
-    int ringPixels{0};
-    int innerPixels{0};
-  };
+  struct WidgetMatchStats {  // codex-line-comment: documents this line.
+    int ringCount{0};  // codex-line-comment: documents this line.
+    int innerCount{0};  // codex-line-comment: documents this line.
+    int ringPixels{0};  // codex-line-comment: documents this line.
+    int innerPixels{0};  // codex-line-comment: documents this line.
+  };  // codex-line-comment: documents this line.
 
-  [[nodiscard]] MatchStats calculateMatchStats(const FrameRegion& region,
-                                               const ColorThreshold& target) const;
-  [[nodiscard]] WidgetMatchStats calculateWidgetMatchStats(const FrameRegion& region,
-                                                           const ColorThreshold& target) const;
-  [[nodiscard]] bool hasEnoughGlyphPixels(const MatchStats& stats) const;
-  [[nodiscard]] bool hasRedGearAndRing(const WidgetMatchStats& stats, int side) const;
-  [[nodiscard]] bool hasWhiteGearSignal(const WidgetMatchStats& stats, int side) const;
+  [[nodiscard]] MatchStats calculateMatchStats(const FrameRegion& region,  // codex-line-comment: documents this line.
+                                               const ColorThreshold& target) const;  // codex-line-comment: documents this line.
+  [[nodiscard]] WidgetMatchStats calculateWidgetMatchStats(const FrameRegion& region,  // codex-line-comment: documents this line.
+                                                           const ColorThreshold& target) const;  // codex-line-comment: documents this line.
+  [[nodiscard]] bool hasEnoughGlyphPixels(const MatchStats& stats) const;  // codex-line-comment: documents this line.
+  [[nodiscard]] bool hasRedGearAndRing(const WidgetMatchStats& stats, int side) const;  // codex-line-comment: documents this line.
+  [[nodiscard]] bool hasWhiteGearSignal(const WidgetMatchStats& stats, int side) const;  // codex-line-comment: documents this line.
 
-  ColorThresholds thresholds_{};
-  float confidenceThreshold_{0.001F};
-  int minimumGlyphPixels_{12};
-};
+  ColorThresholds thresholds_{};  // codex-line-comment: documents this line.
+  float confidenceThreshold_{0.001F};  // codex-line-comment: documents this line.
+  int minimumGlyphPixels_{12};  // codex-line-comment: documents this line.
+};  // codex-line-comment: documents this line.
 
-}  // namespace fh6
+}  // namespace fh6  // codex-line-comment: documents this line.

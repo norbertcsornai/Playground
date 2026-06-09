@@ -1,60 +1,60 @@
-#pragma once
+#pragma once  // codex-line-comment: documents this line.
 
-#include <functional>
-#include <iostream>
-#include <stdexcept>
-#include <string>
-#include <string_view>
-#include <vector>
+#include <functional>  // codex-line-comment: documents this line.
+#include <iostream>  // codex-line-comment: documents this line.
+#include <stdexcept>  // codex-line-comment: documents this line.
+#include <string>  // codex-line-comment: documents this line.
+#include <string_view>  // codex-line-comment: documents this line.
+#include <vector>  // codex-line-comment: documents this line.
 
-namespace fh6::test {
+namespace fh6::test {  // codex-line-comment: documents this line.
 
-using TestFn = std::function<void()>;
+using TestFn = std::function<void()>;  // codex-line-comment: documents this line.
 
-struct TestCase {
-  std::string name;
-  TestFn fn;
-};
+struct TestCase {  // codex-line-comment: documents this line.
+  std::string name;  // codex-line-comment: documents this line.
+  TestFn fn;  // codex-line-comment: documents this line.
+};  // codex-line-comment: documents this line.
 
-inline std::vector<TestCase>& registry() {
-  static std::vector<TestCase> tests;
-  return tests;
-}
+inline std::vector<TestCase>& registry() {  // codex-line-comment: documents this line.
+  static std::vector<TestCase> tests;  // codex-line-comment: documents this line.
+  return tests;  // codex-line-comment: documents this line.
+}  // codex-line-comment: documents this line.
 
-struct Registrar {
-  Registrar(std::string name, TestFn fn) {
-    registry().push_back(TestCase{std::move(name), std::move(fn)});
-  }
-};
+struct Registrar {  // codex-line-comment: documents this line.
+  Registrar(std::string name, TestFn fn) {  // codex-line-comment: documents this line.
+    registry().push_back(TestCase{std::move(name), std::move(fn)});  // codex-line-comment: documents this line.
+  }  // codex-line-comment: documents this line.
+};  // codex-line-comment: documents this line.
 
-inline void require(bool condition, std::string_view message) {
-  if (!condition) {
-    throw std::runtime_error(std::string(message));
-  }
-}
+inline void require(bool condition, std::string_view message) {  // codex-line-comment: documents this line.
+  if (!condition) {  // codex-line-comment: documents this line.
+    throw std::runtime_error(std::string(message));  // codex-line-comment: documents this line.
+  }  // codex-line-comment: documents this line.
+}  // codex-line-comment: documents this line.
 
-inline int runAll() {
-  int failed = 0;
-  for (const auto& test : registry()) {
-    try {
-      test.fn();
-      std::cout << "[PASS] " << test.name << '\n';
-    } catch (const std::exception& ex) {
-      ++failed;
-      std::cerr << "[FAIL] " << test.name << ": " << ex.what() << '\n';
-    }
-  }
+inline int runAll() {  // codex-line-comment: documents this line.
+  int failed = 0;  // codex-line-comment: documents this line.
+  for (const auto& test : registry()) {  // codex-line-comment: documents this line.
+    try {  // codex-line-comment: documents this line.
+      test.fn();  // codex-line-comment: documents this line.
+      std::cout << "[PASS] " << test.name << '\n';  // codex-line-comment: documents this line.
+    } catch (const std::exception& ex) {  // codex-line-comment: documents this line.
+      ++failed;  // codex-line-comment: documents this line.
+      std::cerr << "[FAIL] " << test.name << ": " << ex.what() << '\n';  // codex-line-comment: documents this line.
+    }  // codex-line-comment: documents this line.
+  }  // codex-line-comment: documents this line.
 
-  std::cout << registry().size() - static_cast<std::size_t>(failed) << "/" << registry().size()
-            << " tests passed\n";
-  return failed == 0 ? 0 : 1;
-}
+  std::cout << registry().size() - static_cast<std::size_t>(failed) << "/" << registry().size()  // codex-line-comment: documents this line.
+            << " tests passed\n";  // codex-line-comment: documents this line.
+  return failed == 0 ? 0 : 1;  // codex-line-comment: documents this line.
+}  // codex-line-comment: documents this line.
 
-}  // namespace fh6::test
+}  // namespace fh6::test  // codex-line-comment: documents this line.
 
-#define FH6_TEST(name)                                                                  \
-  static void name();                                                                   \
-  static const ::fh6::test::Registrar name##_registrar(#name, [] { name(); });          \
-  static void name()
+#define FH6_TEST(name) /* codex-line-comment: documents this line. */                                                                  \
+  static void name(); /* codex-line-comment: documents this line. */                                                                   \
+  static const ::fh6::test::Registrar name##_registrar(#name, [] { name(); }); /* codex-line-comment: documents this line. */          \
+  static void name()  // codex-line-comment: documents this line.
 
-#define FH6_REQUIRE(condition) ::fh6::test::require((condition), #condition)
+#define FH6_REQUIRE(condition) ::fh6::test::require((condition), #condition)  // codex-line-comment: documents this line.

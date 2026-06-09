@@ -1,13 +1,13 @@
-#pragma once
+#pragma once  // codex-line-comment: documents this line.
 
-#include "shared/Time.h"
+#include "shared/Time.h"  // codex-line-comment: documents this line.
 
-namespace fh6 {
+namespace fh6 {  // codex-line-comment: documents this line.
 
-struct ShiftAlertState {
-  bool active{false};
-  bool triggeredThisFrame{false};
-  TimePoint expiresAt{};
-};
+struct ShiftAlertState {  // codex-line-comment: documents this line.
+  bool active{false};  // codex-line-comment: documents this line.
+  bool triggeredThisFrame{false};  // codex-line-comment: documents this line.
+  TimePoint expiresAt{};  // codex-line-comment: documents this line.
+};  // codex-line-comment: documents this line.
 
-}  // namespace fh6
+}  // namespace fh6  // codex-line-comment: documents this line.

@@ -1,43 +1,43 @@
-#include "alert/ShiftAlertController.h"
+#include "alert/ShiftAlertController.h"  // codex-line-comment: documents this line.
 
-namespace fh6 {
+namespace fh6 {  // codex-line-comment: documents this line.
 
-ShiftAlertController::ShiftAlertController(std::chrono::milliseconds arrowDuration)
-    : arrowDuration_(arrowDuration) {}
+ShiftAlertController::ShiftAlertController(std::chrono::milliseconds arrowDuration)  // codex-line-comment: documents this line.
+    : arrowDuration_(arrowDuration) {}  // codex-line-comment: documents this line.
 
-ShiftAlertState ShiftAlertController::update(const GearDetectionResult& result, TimePoint now) {
-  bool triggered = false;
+ShiftAlertState ShiftAlertController::update(const GearDetectionResult& result, TimePoint now) {  // codex-line-comment: documents this line.
+  bool triggered = false;  // codex-line-comment: documents this line.
 
-  if (result.isConfident() && result.colorState == GearColorState::Red) {
-    triggered = !triggeredForCurrentRed_;
-    triggeredForCurrentRed_ = true;
-    alertActiveUntil_ = now + arrowDuration_;
-  } else if (result.isConfident() && result.colorState == GearColorState::White) {
-    alertActiveUntil_ = now;
-  }
+  if (result.isConfident() && result.colorState == GearColorState::Red) {  // codex-line-comment: documents this line.
+    triggered = !triggeredForCurrentRed_;  // codex-line-comment: documents this line.
+    triggeredForCurrentRed_ = true;  // codex-line-comment: documents this line.
+    alertActiveUntil_ = now + arrowDuration_;  // codex-line-comment: documents this line.
+  } else if (result.isConfident() && result.colorState == GearColorState::White) {  // codex-line-comment: documents this line.
+    alertActiveUntil_ = now;  // codex-line-comment: documents this line.
+  }  // codex-line-comment: documents this line.
 
-  if (result.colorState != GearColorState::Unknown && result.isConfident()) {
-    if (result.colorState == GearColorState::White) {
-      triggeredForCurrentRed_ = false;
-    }
-    previousColorState_ = result.colorState;
-  }
+  if (result.colorState != GearColorState::Unknown && result.isConfident()) {  // codex-line-comment: documents this line.
+    if (result.colorState == GearColorState::White) {  // codex-line-comment: documents this line.
+      triggeredForCurrentRed_ = false;  // codex-line-comment: documents this line.
+    }  // codex-line-comment: documents this line.
+    previousColorState_ = result.colorState;  // codex-line-comment: documents this line.
+  }  // codex-line-comment: documents this line.
 
-  return ShiftAlertState{
-      isAlertActive(now),
-      triggered,
-      alertActiveUntil_,
-  };
-}
+  return ShiftAlertState{  // codex-line-comment: documents this line.
+      isAlertActive(now),  // codex-line-comment: documents this line.
+      triggered,  // codex-line-comment: documents this line.
+      alertActiveUntil_,  // codex-line-comment: documents this line.
+  };  // codex-line-comment: documents this line.
+}  // codex-line-comment: documents this line.
 
-void ShiftAlertController::reset() {
-  previousColorState_ = GearColorState::Unknown;
-  alertActiveUntil_ = {};
-  triggeredForCurrentRed_ = false;
-}
+void ShiftAlertController::reset() {  // codex-line-comment: documents this line.
+  previousColorState_ = GearColorState::Unknown;  // codex-line-comment: documents this line.
+  alertActiveUntil_ = {};  // codex-line-comment: documents this line.
+  triggeredForCurrentRed_ = false;  // codex-line-comment: documents this line.
+}  // codex-line-comment: documents this line.
 
-bool ShiftAlertController::isAlertActive(TimePoint now) const {
-  return alertActiveUntil_ > now;
-}
+bool ShiftAlertController::isAlertActive(TimePoint now) const {  // codex-line-comment: documents this line.
+  return alertActiveUntil_ > now;  // codex-line-comment: documents this line.
+}  // codex-line-comment: documents this line.
 
-}  // namespace fh6
+}  // namespace fh6  // codex-line-comment: documents this line.

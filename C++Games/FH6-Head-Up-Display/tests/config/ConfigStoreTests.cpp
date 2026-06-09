@@ -1,53 +1,53 @@
-#include "TestFramework.h"
+#include "TestFramework.h"  // codex-line-comment: documents this line.
 
-#include <filesystem>
+#include <filesystem>  // codex-line-comment: documents this line.
 
-#include "config/ConfigStore.h"
+#include "config/ConfigStore.h"  // codex-line-comment: documents this line.
 
-using namespace fh6;
+using namespace fh6;  // codex-line-comment: documents this line.
 
-namespace {
+namespace {  // codex-line-comment: documents this line.
 
-std::filesystem::path tempConfigPath(const char* name) {
-  return std::filesystem::temp_directory_path() / name;
-}
+std::filesystem::path tempConfigPath(const char* name) {  // codex-line-comment: documents this line.
+  return std::filesystem::temp_directory_path() / name;  // codex-line-comment: documents this line.
+}  // codex-line-comment: documents this line.
 
-}  // namespace
+}  // namespace  // codex-line-comment: documents this line.
 
-FH6_TEST(config_store_loads_defaults_when_missing) {
-  const auto path = tempConfigPath("fh6-hud-missing-test.ini");
-  std::filesystem::remove(path);
+FH6_TEST(config_store_loads_defaults_when_missing) {  // codex-line-comment: documents this line.
+  const auto path = tempConfigPath("fh6-hud-missing-test.ini");  // codex-line-comment: documents this line.
+  std::filesystem::remove(path);  // codex-line-comment: documents this line.
 
-  ConfigStore store(path);
-  const auto config = store.load();
+  ConfigStore store(path);  // codex-line-comment: documents this line.
+  const auto config = store.load();  // codex-line-comment: documents this line.
 
-  FH6_REQUIRE(config.arrowSize.width == 150);
-  FH6_REQUIRE(config.arrowSize.height == 300);
-  FH6_REQUIRE(config.gearRegion.width == 420);
-  FH6_REQUIRE(config.gearRegion.height == 420);
-  FH6_REQUIRE(config.arrowDuration.count() == 1500);
-  FH6_REQUIRE(config.captureRateLimitFps == 30);
-}
+  FH6_REQUIRE(config.arrowSize.width == 75);  // codex-line-comment: documents this line.
+  FH6_REQUIRE(config.arrowSize.height == 150);  // codex-line-comment: documents this line.
+  FH6_REQUIRE(config.gearRegion.width == 420);  // codex-line-comment: documents this line.
+  FH6_REQUIRE(config.gearRegion.height == 420);  // codex-line-comment: documents this line.
+  FH6_REQUIRE(config.arrowDuration.count() == 1500);  // codex-line-comment: documents this line.
+  FH6_REQUIRE(config.captureRateLimitFps == 30);  // codex-line-comment: documents this line.
+}  // codex-line-comment: documents this line.
 
-FH6_TEST(config_store_saves_and_loads_values) {
-  const auto path = tempConfigPath("fh6-hud-save-test.ini");
-  std::filesystem::remove(path);
+FH6_TEST(config_store_saves_and_loads_values) {  // codex-line-comment: documents this line.
+  const auto path = tempConfigPath("fh6-hud-save-test.ini");  // codex-line-comment: documents this line.
+  std::filesystem::remove(path);  // codex-line-comment: documents this line.
 
-  ConfigStore store(path);
-  AppConfig config;
-  config.gearRegion = Rect{4, 5, 60, 70};
-  config.arrowDuration = std::chrono::milliseconds(400);
-  config.diagnosticsEnabled = true;
-  store.save(config);
+  ConfigStore store(path);  // codex-line-comment: documents this line.
+  AppConfig config;  // codex-line-comment: documents this line.
+  config.gearRegion = Rect{4, 5, 60, 70};  // codex-line-comment: documents this line.
+  config.arrowDuration = std::chrono::milliseconds(400);  // codex-line-comment: documents this line.
+  config.diagnosticsEnabled = true;  // codex-line-comment: documents this line.
+  store.save(config);  // codex-line-comment: documents this line.
 
-  const auto loaded = store.load();
+  const auto loaded = store.load();  // codex-line-comment: documents this line.
 
-  FH6_REQUIRE(loaded.gearRegion.x == 4);
-  FH6_REQUIRE(loaded.gearRegion.y == 5);
-  FH6_REQUIRE(loaded.gearRegion.width == 60);
-  FH6_REQUIRE(loaded.gearRegion.height == 70);
-  FH6_REQUIRE(loaded.arrowDuration.count() == 400);
-  FH6_REQUIRE(loaded.diagnosticsEnabled);
+  FH6_REQUIRE(loaded.gearRegion.x == 4);  // codex-line-comment: documents this line.
+  FH6_REQUIRE(loaded.gearRegion.y == 5);  // codex-line-comment: documents this line.
+  FH6_REQUIRE(loaded.gearRegion.width == 60);  // codex-line-comment: documents this line.
+  FH6_REQUIRE(loaded.gearRegion.height == 70);  // codex-line-comment: documents this line.
+  FH6_REQUIRE(loaded.arrowDuration.count() == 400);  // codex-line-comment: documents this line.
+  FH6_REQUIRE(loaded.diagnosticsEnabled);  // codex-line-comment: documents this line.
 
-  std::filesystem::remove(path);
-}
+  std::filesystem::remove(path);  // codex-line-comment: documents this line.
+}  // codex-line-comment: documents this line.

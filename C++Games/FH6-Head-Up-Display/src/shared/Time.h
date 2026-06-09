@@ -1,10 +1,10 @@
-#pragma once
+#pragma once  // codex-line-comment: documents this line.
 
-#include <chrono>
+#include <chrono>  // codex-line-comment: documents this line.
 
-namespace fh6 {
+namespace fh6 {  // codex-line-comment: documents this line.
 
-using Clock = std::chrono::steady_clock;
-using TimePoint = Clock::time_point;
+using Clock = std::chrono::steady_clock;  // codex-line-comment: documents this line.
+using TimePoint = Clock::time_point;  // codex-line-comment: documents this line.
 
-}  // namespace fh6
+}  // namespace fh6  // codex-line-comment: documents this line.

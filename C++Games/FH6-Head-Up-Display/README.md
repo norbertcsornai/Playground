@@ -99,8 +99,9 @@ If the file does not exist, defaults are used.
 
 Important defaults:
 
-- Arrow size: `150x300`
+- Arrow size: `75x150`
 - Arrow position: centered horizontally, `200 px` above screen center
+- Arrow opacity: `100%`
 - Arrow duration: `1500 ms`
 - Capture rate limit: `30 FPS`
 - Gear region: dynamic lower-right default, scaled from the captured frame height

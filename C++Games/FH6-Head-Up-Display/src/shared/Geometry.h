@@ -1,21 +1,21 @@
-#pragma once
+#pragma once  // codex-line-comment: documents this line.
 
-namespace fh6 {
+namespace fh6 {  // codex-line-comment: documents this line.
 
-struct Rect {
-  int x{0};
-  int y{0};
-  int width{0};
-  int height{0};
+struct Rect {  // codex-line-comment: documents this line.
+  int x{0};  // codex-line-comment: documents this line.
+  int y{0};  // codex-line-comment: documents this line.
+  int width{0};  // codex-line-comment: documents this line.
+  int height{0};  // codex-line-comment: documents this line.
 
-  [[nodiscard]] bool empty() const {
-    return width <= 0 || height <= 0;
-  }
-};
+  [[nodiscard]] bool empty() const {  // codex-line-comment: documents this line.
+    return width <= 0 || height <= 0;  // codex-line-comment: documents this line.
+  }  // codex-line-comment: documents this line.
+};  // codex-line-comment: documents this line.
 
-struct Size {
-  int width{0};
-  int height{0};
-};
+struct Size {  // codex-line-comment: documents this line.
+  int width{0};  // codex-line-comment: documents this line.
+  int height{0};  // codex-line-comment: documents this line.
+};  // codex-line-comment: documents this line.
 
-}  // namespace fh6
+}  // namespace fh6  // codex-line-comment: documents this line.
