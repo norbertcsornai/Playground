@@ -1,25 +1,25 @@
-#pragma once  // codex-line-comment: documents this line.
+#pragma once  // Prevents this header from being included more than once.
 
-#include <optional>  // codex-line-comment: documents this line.
-#include <string>  // codex-line-comment: documents this line.
+#include <optional>  // Imports the optional standard library declarations used in this file.
+#include <string>  // Imports the string standard library declarations used in this file.
 
-#include "shared/DisplayInfo.h"  // codex-line-comment: documents this line.
+#include "shared/DisplayInfo.h"  // Imports project declarations from shared/DisplayInfo.h.
 
-namespace fh6 {  // codex-line-comment: documents this line.
+namespace fh6 {  // Places the following declarations inside namespace fh6.
 
-class GameWindowTracker {  // codex-line-comment: documents this line.
- public:  // codex-line-comment: documents this line.
-  explicit GameWindowTracker(std::string targetWindowTitle = "Forza Horizon");  // codex-line-comment: documents this line.
+class GameWindowTracker {  // Declares the GameWindowTracker class interface and members.
+ public:  // Makes the following members part of the public API.
+  explicit GameWindowTracker(std::string targetWindowTitle = "Forza Horizon");  // Declares the explicit GameWindowTracker constructor.
 
-  [[nodiscard]] std::optional<WindowInfo> findGameWindow();  // codex-line-comment: documents this line.
-  [[nodiscard]] bool isGameRunning();  // codex-line-comment: documents this line.
-  [[nodiscard]] bool isGameVisible();  // codex-line-comment: documents this line.
-  [[nodiscard]] DisplayInfo getActiveDisplay();  // codex-line-comment: documents this line.
-  void refresh();  // codex-line-comment: documents this line.
+  [[nodiscard]] std::optional<WindowInfo> findGameWindow();  // Declares findGameWindow and marks its return value as important.
+  [[nodiscard]] bool isGameRunning();  // Declares isGameRunning and marks its return value as important.
+  [[nodiscard]] bool isGameVisible();  // Declares isGameVisible and marks its return value as important.
+  [[nodiscard]] DisplayInfo getActiveDisplay();  // Declares getActiveDisplay and marks its return value as important.
+  void refresh();  // Declares function refresh for callers.
 
- private:  // codex-line-comment: documents this line.
-  std::string targetWindowTitle_;  // codex-line-comment: documents this line.
-  std::optional<WindowInfo> gameWindow_{};  // codex-line-comment: documents this line.
-};  // codex-line-comment: documents this line.
+ private:  // Makes the following members private implementation details.
+  std::string targetWindowTitle_;  // Declares targetWindowTitle_ for use in this scope.
+  std::optional<WindowInfo> gameWindow_{};  // Declares gameWindow_ with value initialization.
+};  // Ends the current type, struct, or initializer declaration.
 
-}  // namespace fh6  // codex-line-comment: documents this line.
+}  // Ends the current code block.

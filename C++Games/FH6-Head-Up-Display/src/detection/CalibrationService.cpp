@@ -1,55 +1,55 @@
-#include "detection/CalibrationService.h"  // codex-line-comment: documents this line.
+#include "detection/CalibrationService.h"  // Imports project declarations from detection/CalibrationService.h.
 
-#include <algorithm>  // codex-line-comment: documents this line.
+#include <algorithm>  // Imports the algorithm standard library declarations used in this file.
 
-namespace fh6 {  // codex-line-comment: documents this line.
+namespace fh6 {  // Places the following declarations inside namespace fh6.
 
-CalibrationService::CalibrationService()  // codex-line-comment: documents this line.
-    : defaultRegion_(Rect{-1, -1, 420, 420}), currentRegion_(defaultRegion_) {}  // codex-line-comment: documents this line.
+CalibrationService::CalibrationService()  // Begins the multi-line constructor definition for CalibrationService.
+    : defaultRegion_(Rect{-1, -1, 420, 420}), currentRegion_(defaultRegion_) {}  // Initializes constructor members with defaultRegion_(Rect{-1, -1, 420, 420}), currentRegion_(defaultRegion_).
 
-std::optional<Rect> CalibrationService::autoLocateGearRegion(const Frame& frame) const {  // codex-line-comment: documents this line.
-  if (frame.empty()) {  // codex-line-comment: documents this line.
-    return std::nullopt;  // codex-line-comment: documents this line.
-  }  // codex-line-comment: documents this line.
+std::optional<Rect> CalibrationService::autoLocateGearRegion(const Frame& frame) const {  // Implements CalibrationService::autoLocateGearRegion.
+  if (frame.empty()) {  // Guards the following work behind the condition frame.empty().
+    return std::nullopt;  // Returns std::nullopt to the caller.
+  }  // Ends the current code block.
 
-  return getGearRegion(frame);  // codex-line-comment: documents this line.
-}  // codex-line-comment: documents this line.
+  return getGearRegion(frame);  // Returns getGearRegion(frame) to the caller.
+}  // Ends the current code block.
 
-void CalibrationService::setManualRegion(const Rect& region) {  // codex-line-comment: documents this line.
-  if (!region.empty()) {  // codex-line-comment: documents this line.
-    currentRegion_ = region;  // codex-line-comment: documents this line.
-  }  // codex-line-comment: documents this line.
-}  // codex-line-comment: documents this line.
+void CalibrationService::setManualRegion(const Rect& region) {  // Implements CalibrationService::setManualRegion.
+  if (!region.empty()) {  // Guards the following work behind the condition !region.empty().
+    currentRegion_ = region;  // Sets currentRegion_ to region.
+  }  // Ends the current code block.
+}  // Ends the current code block.
 
-Rect CalibrationService::getGearRegion() const {  // codex-line-comment: documents this line.
-  return currentRegion_;  // codex-line-comment: documents this line.
-}  // codex-line-comment: documents this line.
+Rect CalibrationService::getGearRegion() const {  // Implements CalibrationService::getGearRegion.
+  return currentRegion_;  // Returns currentRegion_ to the caller.
+}  // Ends the current code block.
 
-Rect CalibrationService::getGearRegion(const Frame& frame) const {  // codex-line-comment: documents this line.
-  if (currentRegion_.x < 0 || currentRegion_.y < 0) {  // codex-line-comment: documents this line.
-    return resolveDynamicRegion(frame);  // codex-line-comment: documents this line.
-  }  // codex-line-comment: documents this line.
+Rect CalibrationService::getGearRegion(const Frame& frame) const {  // Implements CalibrationService::getGearRegion.
+  if (currentRegion_.x < 0 || currentRegion_.y < 0) {  // Guards the following work behind the condition currentRegion_.x < 0 || currentRegion_.y < 0.
+    return resolveDynamicRegion(frame);  // Returns resolveDynamicRegion(frame) to the caller.
+  }  // Ends the current code block.
 
-  return currentRegion_;  // codex-line-comment: documents this line.
-}  // codex-line-comment: documents this line.
+  return currentRegion_;  // Returns currentRegion_ to the caller.
+}  // Ends the current code block.
 
-void CalibrationService::resetToDefaults() {  // codex-line-comment: documents this line.
-  currentRegion_ = defaultRegion_;  // codex-line-comment: documents this line.
-}  // codex-line-comment: documents this line.
+void CalibrationService::resetToDefaults() {  // Implements CalibrationService::resetToDefaults.
+  currentRegion_ = defaultRegion_;  // Sets currentRegion_ to defaultRegion_.
+}  // Ends the current code block.
 
-Rect CalibrationService::resolveDynamicRegion(const Frame& frame) const {  // codex-line-comment: documents this line.
-  const int size = std::max(220, static_cast<int>(static_cast<double>(frame.height()) * 0.373));  // codex-line-comment: documents this line.
-  const int width = size;  // codex-line-comment: documents this line.
-  const int height = size;  // codex-line-comment: documents this line.
-  const int marginX = std::max(12, static_cast<int>(static_cast<double>(frame.width()) * 0.010));  // codex-line-comment: documents this line.
-  const int marginY = std::max(12, static_cast<int>(static_cast<double>(frame.height()) * 0.018));  // codex-line-comment: documents this line.
+Rect CalibrationService::resolveDynamicRegion(const Frame& frame) const {  // Implements CalibrationService::resolveDynamicRegion.
+  const int size = std::max(220, static_cast<int>(static_cast<double>(frame.height()) * 0.373));  // Sets const int size to std::max(220, static_cast<int>(static_cast<double>(frame.height()) * 0.373)).
+  const int width = size;  // Sets const int width to size.
+  const int height = size;  // Sets const int height to size.
+  const int marginX = std::max(12, static_cast<int>(static_cast<double>(frame.width()) * 0.010));  // Sets const int marginX to std::max(12, static_cast<int>(static_cast<double>(frame.width()) * 0.010)).
+  const int marginY = std::max(12, static_cast<int>(static_cast<double>(frame.height()) * 0.018));  // Sets const int marginY to std::max(12, static_cast<int>(static_cast<double>(frame.height()) * 0.018)).
 
-  return Rect{  // codex-line-comment: documents this line.
-      frame.width() - width - marginX,  // codex-line-comment: documents this line.
-      frame.height() - height - marginY,  // codex-line-comment: documents this line.
-      width,  // codex-line-comment: documents this line.
-      height,  // codex-line-comment: documents this line.
-  };  // codex-line-comment: documents this line.
-}  // codex-line-comment: documents this line.
+  return Rect{  // Starts returning a Rect aggregate value.
+      frame.width() - width - marginX,  // Supplies frame.width() - width - marginX to the surrounding call or initializer.
+      frame.height() - height - marginY,  // Supplies frame.height() - height - marginY to the surrounding call or initializer.
+      width,  // Supplies width to the surrounding call or initializer.
+      height,  // Supplies height to the surrounding call or initializer.
+  };  // Ends the current type, struct, or initializer declaration.
+}  // Ends the current code block.
 
-}  // namespace fh6  // codex-line-comment: documents this line.
+}  // Ends the current code block.

@@ -1,18 +1,18 @@
-#pragma once  // codex-line-comment: documents this line.
+#pragma once  // Prevents this header from being included more than once.
 
-namespace fh6 {  // codex-line-comment: documents this line.
+namespace fh6 {  // Places the following declarations inside namespace fh6.
 
-enum class FrameStatus {  // codex-line-comment: documents this line.
-  Idle,  // codex-line-comment: documents this line.
-  Capturing,  // codex-line-comment: documents this line.
-  Unavailable,  // codex-line-comment: documents this line.
-  Failed,  // codex-line-comment: documents this line.
-};  // codex-line-comment: documents this line.
+enum class FrameStatus {  // Declares the FrameStatus scoped enum values.
+  Idle,  // Supplies Idle to the surrounding call or initializer.
+  Capturing,  // Supplies Capturing to the surrounding call or initializer.
+  Unavailable,  // Supplies Unavailable to the surrounding call or initializer.
+  Failed,  // Supplies Failed to the surrounding call or initializer.
+};  // Ends the current type, struct, or initializer declaration.
 
-enum class OverlayStatus {  // codex-line-comment: documents this line.
-  Hidden,  // codex-line-comment: documents this line.
-  Visible,  // codex-line-comment: documents this line.
-  Failed,  // codex-line-comment: documents this line.
-};  // codex-line-comment: documents this line.
+enum class OverlayStatus {  // Declares the OverlayStatus scoped enum values.
+  Hidden,  // Supplies Hidden to the surrounding call or initializer.
+  Visible,  // Supplies Visible to the surrounding call or initializer.
+  Failed,  // Supplies Failed to the surrounding call or initializer.
+};  // Ends the current type, struct, or initializer declaration.
 
-}  // namespace fh6  // codex-line-comment: documents this line.
+}  // Ends the current code block.

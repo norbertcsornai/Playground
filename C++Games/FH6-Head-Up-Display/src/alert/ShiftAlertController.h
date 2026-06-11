@@ -1,27 +1,27 @@
-#pragma once  // codex-line-comment: documents this line.
+#pragma once  // Prevents this header from being included more than once.
 
-#include <chrono>  // codex-line-comment: documents this line.
+#include <chrono>  // Imports the chrono standard library declarations used in this file.
 
-#include "alert/ShiftAlertState.h"  // codex-line-comment: documents this line.
-#include "detection/GearDetectionResult.h"  // codex-line-comment: documents this line.
-#include "shared/GearTypes.h"  // codex-line-comment: documents this line.
-#include "shared/Time.h"  // codex-line-comment: documents this line.
+#include "alert/ShiftAlertState.h"  // Imports project declarations from alert/ShiftAlertState.h.
+#include "detection/GearDetectionResult.h"  // Imports project declarations from detection/GearDetectionResult.h.
+#include "shared/GearTypes.h"  // Imports project declarations from shared/GearTypes.h.
+#include "shared/Time.h"  // Imports project declarations from shared/Time.h.
 
-namespace fh6 {  // codex-line-comment: documents this line.
+namespace fh6 {  // Places the following declarations inside namespace fh6.
 
-class ShiftAlertController {  // codex-line-comment: documents this line.
- public:  // codex-line-comment: documents this line.
-  explicit ShiftAlertController(std::chrono::milliseconds arrowDuration = std::chrono::milliseconds(1500));  // codex-line-comment: documents this line.
+class ShiftAlertController {  // Declares the ShiftAlertController class interface and members.
+ public:  // Makes the following members part of the public API.
+  explicit ShiftAlertController(std::chrono::milliseconds arrowDuration = std::chrono::milliseconds(1500));  // Declares the explicit ShiftAlertController constructor.
 
-  [[nodiscard]] ShiftAlertState update(const GearDetectionResult& result, TimePoint now);  // codex-line-comment: documents this line.
-  void reset();  // codex-line-comment: documents this line.
-  [[nodiscard]] bool isAlertActive(TimePoint now) const;  // codex-line-comment: documents this line.
+  [[nodiscard]] ShiftAlertState update(const GearDetectionResult& result, TimePoint now);  // Declares update and marks its return value as important.
+  void reset();  // Declares function reset for callers.
+  [[nodiscard]] bool isAlertActive(TimePoint now) const;  // Declares isAlertActive and marks its return value as important.
 
- private:  // codex-line-comment: documents this line.
-  GearColorState previousColorState_{GearColorState::Unknown};  // codex-line-comment: documents this line.
-  TimePoint alertActiveUntil_{};  // codex-line-comment: documents this line.
-  std::chrono::milliseconds arrowDuration_{1500};  // codex-line-comment: documents this line.
-  bool triggeredForCurrentRed_{false};  // codex-line-comment: documents this line.
-};  // codex-line-comment: documents this line.
+ private:  // Makes the following members private implementation details.
+  GearColorState previousColorState_{GearColorState::Unknown};  // Declares previousColorState_ and initializes it with GearColorState::Unknown.
+  TimePoint alertActiveUntil_{};  // Declares alertActiveUntil_ with value initialization.
+  std::chrono::milliseconds arrowDuration_{1500};  // Declares arrowDuration_ and initializes it with 1500.
+  bool triggeredForCurrentRed_{false};  // Declares triggeredForCurrentRed_ and initializes it with false.
+};  // Ends the current type, struct, or initializer declaration.
 
-}  // namespace fh6  // codex-line-comment: documents this line.
+}  // Ends the current code block.

@@ -1,25 +1,25 @@
-#pragma once  // codex-line-comment: documents this line.
+#pragma once  // Prevents this header from being included more than once.
 
-#include <string>  // codex-line-comment: documents this line.
+#include <string>  // Imports the string standard library declarations used in this file.
 
-#include "shared/Geometry.h"  // codex-line-comment: documents this line.
+#include "shared/Geometry.h"  // Imports project declarations from shared/Geometry.h.
 
-namespace fh6 {  // codex-line-comment: documents this line.
+namespace fh6 {  // Places the following declarations inside namespace fh6.
 
-using WindowHandle = void*;  // codex-line-comment: documents this line.
+using WindowHandle = void*;  // Aliases WindowHandle to void*.
 
-struct DisplayInfo {  // codex-line-comment: documents this line.
-  std::string id{"primary"};  // codex-line-comment: documents this line.
-  Rect bounds{};  // codex-line-comment: documents this line.
-  float dpiScale{1.0F};  // codex-line-comment: documents this line.
-  bool isHdrEnabled{false};  // codex-line-comment: documents this line.
-};  // codex-line-comment: documents this line.
+struct DisplayInfo {  // Declares the DisplayInfo value type and fields.
+  std::string id{"primary"};  // Declares id and initializes it with "primary".
+  Rect bounds{};  // Declares bounds with value initialization.
+  float dpiScale{1.0F};  // Declares dpiScale and initializes it with 1.0F.
+  bool isHdrEnabled{false};  // Declares isHdrEnabled and initializes it with false.
+};  // Ends the current type, struct, or initializer declaration.
 
-struct WindowInfo {  // codex-line-comment: documents this line.
-  WindowHandle handle{nullptr};  // codex-line-comment: documents this line.
-  std::string title{};  // codex-line-comment: documents this line.
-  Rect bounds{};  // codex-line-comment: documents this line.
-  DisplayInfo display{};  // codex-line-comment: documents this line.
-};  // codex-line-comment: documents this line.
+struct WindowInfo {  // Declares the WindowInfo value type and fields.
+  WindowHandle handle{nullptr};  // Declares handle and initializes it with nullptr.
+  std::string title{};  // Declares title with value initialization.
+  Rect bounds{};  // Declares bounds with value initialization.
+  DisplayInfo display{};  // Declares display with value initialization.
+};  // Ends the current type, struct, or initializer declaration.
 
-}  // namespace fh6  // codex-line-comment: documents this line.
+}  // Ends the current code block.

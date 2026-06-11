@@ -36,6 +36,7 @@ enable_testing()
 add_executable(fh6-hud-tests
   tests/TestMain.cpp
   tests/alert/ShiftAlertControllerTests.cpp
+  tests/capture/FrameTests.cpp
   tests/config/ConfigStoreTests.cpp
   tests/detection/GearColorClassifierTests.cpp
   tests/detection/GearDetectorTests.cpp

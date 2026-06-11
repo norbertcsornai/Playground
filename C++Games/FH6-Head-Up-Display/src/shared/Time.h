@@ -1,10 +1,10 @@
-#pragma once  // codex-line-comment: documents this line.
+#pragma once  // Prevents this header from being included more than once.
 
-#include <chrono>  // codex-line-comment: documents this line.
+#include <chrono>  // Imports the chrono standard library declarations used in this file.
 
-namespace fh6 {  // codex-line-comment: documents this line.
+namespace fh6 {  // Places the following declarations inside namespace fh6.
 
-using Clock = std::chrono::steady_clock;  // codex-line-comment: documents this line.
-using TimePoint = Clock::time_point;  // codex-line-comment: documents this line.
+using Clock = std::chrono::steady_clock;  // Aliases Clock to std::chrono::steady_clock.
+using TimePoint = Clock::time_point;  // Aliases TimePoint to Clock::time_point.
 
-}  // namespace fh6  // codex-line-comment: documents this line.
+}  // Ends the current code block.

@@ -1,39 +1,39 @@
-#include <atomic>  // codex-line-comment: documents this line.
-#include <csignal>  // codex-line-comment: documents this line.
-#include <iostream>  // codex-line-comment: documents this line.
+#include <atomic>  // Imports the atomic standard library declarations used in this file.
+#include <csignal>  // Imports the csignal standard library declarations used in this file.
+#include <iostream>  // Imports the iostream standard library declarations used in this file.
 
-#include "app/HudApplication.h"  // codex-line-comment: documents this line.
+#include "app/HudApplication.h"  // Imports project declarations from app/HudApplication.h.
 
-namespace {  // codex-line-comment: documents this line.
+namespace {  // Starts a file-local helper namespace.
 
-std::atomic_bool g_stopRequested{false};  // codex-line-comment: documents this line.
-fh6::HudApplication* g_app{nullptr};  // codex-line-comment: documents this line.
+std::atomic_bool g_stopRequested{false};  // Declares g_stopRequested and initializes it with false.
+fh6::HudApplication* g_app{nullptr};  // Declares g_app and initializes it with nullptr.
 
-void handleSignal(int) {  // codex-line-comment: documents this line.
-  g_stopRequested = true;  // codex-line-comment: documents this line.
-  if (g_app != nullptr) {  // codex-line-comment: documents this line.
-    g_app->requestStop();  // codex-line-comment: documents this line.
-  }  // codex-line-comment: documents this line.
-}  // codex-line-comment: documents this line.
+void handleSignal(int) {  // Begins function handleSignal.
+  g_stopRequested = true;  // Sets g_stopRequested to true.
+  if (g_app != nullptr) {  // Guards the following work behind the condition g_app != nullptr.
+    g_app->requestStop();  // Calls requestStop through g_app.
+  }  // Ends the current code block.
+}  // Ends the current code block.
 
-}  // namespace  // codex-line-comment: documents this line.
+}  // Ends the current code block.
 
-int main() {  // codex-line-comment: documents this line.
-  std::signal(SIGINT, handleSignal);  // codex-line-comment: documents this line.
-  std::signal(SIGTERM, handleSignal);  // codex-line-comment: documents this line.
+int main() {  // Begins function main.
+  std::signal(SIGINT, handleSignal);  // Executes std::signal(SIGINT, handleSignal).
+  std::signal(SIGTERM, handleSignal);  // Executes std::signal(SIGTERM, handleSignal).
 
-  fh6::HudApplication app;  // codex-line-comment: documents this line.
-  g_app = &app;  // codex-line-comment: documents this line.
-  if (!app.initialize()) {  // codex-line-comment: documents this line.
-    std::cerr << "Failed to initialize FH6 Head-Up Display.\n";  // codex-line-comment: documents this line.
-    return 1;  // codex-line-comment: documents this line.
-  }  // codex-line-comment: documents this line.
+  fh6::HudApplication app;  // Declares app for use in this scope.
+  g_app = &app;  // Sets g_app to &app.
+  if (!app.initialize()) {  // Guards the following work behind the condition !app.initialize().
+    std::cerr << "Failed to initialize FH6 Head-Up Display.\n";  // Writes "Failed to initialize FH6 Head-Up Display.\n" to standard error.
+    return 1;  // Returns 1 to the caller.
+  }  // Ends the current code block.
 
-  std::cout << "FH6 Head-Up Display is running. Press Ctrl+C to exit.\n";  // codex-line-comment: documents this line.
+  std::cout << "FH6 Head-Up Display is running. Press Ctrl+C to exit.\n";  // Writes "FH6 Head-Up Display is running. Press Ctrl+C to exit.\n" to standard output.
 
-  app.run();  // codex-line-comment: documents this line.
+  app.run();  // Calls run on app.
 
-  app.shutdown();  // codex-line-comment: documents this line.
-  g_app = nullptr;  // codex-line-comment: documents this line.
-  return 0;  // codex-line-comment: documents this line.
-}  // codex-line-comment: documents this line.
+  app.shutdown();  // Calls shutdown on app.
+  g_app = nullptr;  // Sets g_app to nullptr.
+  return 0;  // Returns 0 to the caller.
+}  // Ends the current code block.

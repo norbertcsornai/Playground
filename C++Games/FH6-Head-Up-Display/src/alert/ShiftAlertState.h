@@ -1,13 +1,13 @@
-#pragma once  // codex-line-comment: documents this line.
+#pragma once  // Prevents this header from being included more than once.
 
-#include "shared/Time.h"  // codex-line-comment: documents this line.
+#include "shared/Time.h"  // Imports project declarations from shared/Time.h.
 
-namespace fh6 {  // codex-line-comment: documents this line.
+namespace fh6 {  // Places the following declarations inside namespace fh6.
 
-struct ShiftAlertState {  // codex-line-comment: documents this line.
-  bool active{false};  // codex-line-comment: documents this line.
-  bool triggeredThisFrame{false};  // codex-line-comment: documents this line.
-  TimePoint expiresAt{};  // codex-line-comment: documents this line.
-};  // codex-line-comment: documents this line.
+struct ShiftAlertState {  // Declares the ShiftAlertState value type and fields.
+  bool active{false};  // Declares active and initializes it with false.
+  bool triggeredThisFrame{false};  // Declares triggeredThisFrame and initializes it with false.
+  TimePoint expiresAt{};  // Declares expiresAt with value initialization.
+};  // Ends the current type, struct, or initializer declaration.
 
-}  // namespace fh6  // codex-line-comment: documents this line.
+}  // Ends the current code block.

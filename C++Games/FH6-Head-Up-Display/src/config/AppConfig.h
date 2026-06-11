@@ -1,21 +1,21 @@
-#pragma once  // codex-line-comment: documents this line.
+#pragma once  // Prevents this header from being included more than once.
 
-#include <chrono>  // codex-line-comment: documents this line.
-#include <string>  // codex-line-comment: documents this line.
+#include <chrono>  // Imports the chrono standard library declarations used in this file.
+#include <string>  // Imports the string standard library declarations used in this file.
 
-#include "shared/Color.h"  // codex-line-comment: documents this line.
-#include "shared/Geometry.h"  // codex-line-comment: documents this line.
+#include "shared/Color.h"  // Imports project declarations from shared/Color.h.
+#include "shared/Geometry.h"  // Imports project declarations from shared/Geometry.h.
 
-namespace fh6 {  // codex-line-comment: documents this line.
+namespace fh6 {  // Places the following declarations inside namespace fh6.
 
-struct AppConfig {  // codex-line-comment: documents this line.
-  Rect gearRegion{-1, -1, 420, 420};  // codex-line-comment: documents this line.
-  ColorThresholds colorThresholds{};  // codex-line-comment: documents this line.
-  std::chrono::milliseconds arrowDuration{1500};  // codex-line-comment: documents this line.
-  Size arrowSize{75, 150};  // codex-line-comment: documents this line.
-  std::string targetDisplayId{"primary"};  // codex-line-comment: documents this line.
-  int captureRateLimitFps{30};  // codex-line-comment: documents this line.
-  bool diagnosticsEnabled{false};  // codex-line-comment: documents this line.
-};  // codex-line-comment: documents this line.
+struct AppConfig {  // Declares the AppConfig value type and fields.
+  Rect gearRegion{-1, -1, 420, 420};  // Declares gearRegion and initializes it with -1, -1, 420, 420.
+  ColorThresholds colorThresholds{};  // Declares colorThresholds with value initialization.
+  std::chrono::milliseconds arrowDuration{1500};  // Declares arrowDuration and initializes it with 1500.
+  Size arrowSize{75, 150};  // Declares arrowSize and initializes it with 75, 150.
+  std::string targetDisplayId{"primary"};  // Declares targetDisplayId and initializes it with "primary".
+  int captureRateLimitFps{30};  // Declares captureRateLimitFps and initializes it with 30.
+  bool diagnosticsEnabled{false};  // Declares diagnosticsEnabled and initializes it with false.
+};  // Ends the current type, struct, or initializer declaration.
 
-}  // namespace fh6  // codex-line-comment: documents this line.
+}  // Ends the current code block.

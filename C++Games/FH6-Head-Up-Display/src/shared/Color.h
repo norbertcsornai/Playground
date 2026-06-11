@@ -1,56 +1,56 @@
-#pragma once  // codex-line-comment: documents this line.
+#pragma once  // Prevents this header from being included more than once.
 
-#include <algorithm>  // codex-line-comment: documents this line.
-#include <cstdint>  // codex-line-comment: documents this line.
+#include <algorithm>  // Imports the algorithm standard library declarations used in this file.
+#include <cstdint>  // Imports the cstdint standard library declarations used in this file.
 
-namespace fh6 {  // codex-line-comment: documents this line.
+namespace fh6 {  // Places the following declarations inside namespace fh6.
 
-struct Color {  // codex-line-comment: documents this line.
-  std::uint8_t r{0};  // codex-line-comment: documents this line.
-  std::uint8_t g{0};  // codex-line-comment: documents this line.
-  std::uint8_t b{0};  // codex-line-comment: documents this line.
-  std::uint8_t a{255};  // codex-line-comment: documents this line.
+struct Color {  // Declares the Color value type and fields.
+  std::uint8_t r{0};  // Declares r and initializes it with 0.
+  std::uint8_t g{0};  // Declares g and initializes it with 0.
+  std::uint8_t b{0};  // Declares b and initializes it with 0.
+  std::uint8_t a{255};  // Declares a and initializes it with 255.
 
-  [[nodiscard]] double redDominance() const {  // codex-line-comment: documents this line.
-    return static_cast<double>(r) - (static_cast<double>(g) + static_cast<double>(b)) / 2.0;  // codex-line-comment: documents this line.
-  }  // codex-line-comment: documents this line.
+  [[nodiscard]] double redDominance() const {  // Begins function redDominance.
+    return static_cast<double>(r) - (static_cast<double>(g) + static_cast<double>(b)) / 2.0;  // Returns static_cast<double>(r) - (static_cast<double>(g) + static_cast<double>(b)) / 2.0 to the caller.
+  }  // Ends the current code block.
 
-  [[nodiscard]] double brightness() const {  // codex-line-comment: documents this line.
-    return (0.2126 * static_cast<double>(r)) + (0.7152 * static_cast<double>(g)) +  // codex-line-comment: documents this line.
-           (0.0722 * static_cast<double>(b));  // codex-line-comment: documents this line.
-  }  // codex-line-comment: documents this line.
-};  // codex-line-comment: documents this line.
+  [[nodiscard]] double brightness() const {  // Begins function brightness.
+    return (0.2126 * static_cast<double>(r)) + (0.7152 * static_cast<double>(g)) +  // Continues the surrounding declaration or control-flow expression.
+           (0.0722 * static_cast<double>(b));  // Executes (0.0722 * static_cast<double>(b)).
+  }  // Ends the current code block.
+};  // Ends the current type, struct, or initializer declaration.
 
-struct ColorThreshold {  // codex-line-comment: documents this line.
-  int minRed{0};  // codex-line-comment: documents this line.
-  int minGreen{0};  // codex-line-comment: documents this line.
-  int minBlue{0};  // codex-line-comment: documents this line.
-  int maxRed{255};  // codex-line-comment: documents this line.
-  int maxGreen{255};  // codex-line-comment: documents this line.
-  int maxBlue{255};  // codex-line-comment: documents this line.
-  double minBrightness{0.0};  // codex-line-comment: documents this line.
-  double minRedDominance{0.0};  // codex-line-comment: documents this line.
+struct ColorThreshold {  // Declares the ColorThreshold value type and fields.
+  int minRed{0};  // Declares minRed and initializes it with 0.
+  int minGreen{0};  // Declares minGreen and initializes it with 0.
+  int minBlue{0};  // Declares minBlue and initializes it with 0.
+  int maxRed{255};  // Declares maxRed and initializes it with 255.
+  int maxGreen{255};  // Declares maxGreen and initializes it with 255.
+  int maxBlue{255};  // Declares maxBlue and initializes it with 255.
+  double minBrightness{0.0};  // Declares minBrightness and initializes it with 0.0.
+  double minRedDominance{0.0};  // Declares minRedDominance and initializes it with 0.0.
 
-  [[nodiscard]] bool matches(const Color& color) const {  // codex-line-comment: documents this line.
-    return color.r >= minRed && color.r <= maxRed && color.g >= minGreen && color.g <= maxGreen &&  // codex-line-comment: documents this line.
-           color.b >= minBlue && color.b <= maxBlue && color.brightness() >= minBrightness &&  // codex-line-comment: documents this line.
-           color.redDominance() >= minRedDominance;  // codex-line-comment: documents this line.
-  }  // codex-line-comment: documents this line.
-};  // codex-line-comment: documents this line.
+  [[nodiscard]] bool matches(const Color& color) const {  // Begins function matches.
+    return color.r >= minRed && color.r <= maxRed && color.g >= minGreen && color.g <= maxGreen &&  // Continues the surrounding declaration or control-flow expression.
+           color.b >= minBlue && color.b <= maxBlue && color.brightness() >= minBrightness &&  // Continues the surrounding declaration or control-flow expression.
+           color.redDominance() >= minRedDominance;  // Sets color.redDominance() > to minRedDominance.
+  }  // Ends the current code block.
+};  // Ends the current type, struct, or initializer declaration.
 
-struct ColorThresholds {  // codex-line-comment: documents this line.
-  ColorThreshold white{  // codex-line-comment: documents this line.
-      115, 115, 115,  // codex-line-comment: documents this line.
-      255, 255, 255,  // codex-line-comment: documents this line.
-      120.0,  // codex-line-comment: documents this line.
-      -85.0,  // codex-line-comment: documents this line.
-  };  // codex-line-comment: documents this line.
-  ColorThreshold red{  // codex-line-comment: documents this line.
-      150, 0, 20,  // codex-line-comment: documents this line.
-      255, 115, 190,  // codex-line-comment: documents this line.
-      55.0,  // codex-line-comment: documents this line.
-      55.0,  // codex-line-comment: documents this line.
-  };  // codex-line-comment: documents this line.
-};  // codex-line-comment: documents this line.
+struct ColorThresholds {  // Declares the ColorThresholds value type and fields.
+  ColorThreshold white{  // Starts a multi-line initializer or scope for ColorThreshold white.
+      115, 115, 115,  // Supplies 115, 115, 115 to the surrounding call or initializer.
+      255, 255, 255,  // Supplies 255, 255, 255 to the surrounding call or initializer.
+      120.0,  // Supplies 120.0 to the surrounding call or initializer.
+      -85.0,  // Supplies -85.0 to the surrounding call or initializer.
+  };  // Ends the current type, struct, or initializer declaration.
+  ColorThreshold red{  // Starts a multi-line initializer or scope for ColorThreshold red.
+      150, 0, 20,  // Supplies 150, 0, 20 to the surrounding call or initializer.
+      255, 115, 190,  // Supplies 255, 115, 190 to the surrounding call or initializer.
+      55.0,  // Supplies 55.0 to the surrounding call or initializer.
+      55.0,  // Supplies 55.0 to the surrounding call or initializer.
+  };  // Ends the current type, struct, or initializer declaration.
+};  // Ends the current type, struct, or initializer declaration.
 
-}  // namespace fh6  // codex-line-comment: documents this line.
+}  // Ends the current code block.

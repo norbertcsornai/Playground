@@ -1,33 +1,33 @@
-#pragma once  // codex-line-comment: documents this line.
+#pragma once  // Prevents this header from being included more than once.
 
-#include "overlay/ArrowRenderer.h"  // codex-line-comment: documents this line.
-#include "shared/DisplayInfo.h"  // codex-line-comment: documents this line.
-#include "shared/Geometry.h"  // codex-line-comment: documents this line.
+#include "overlay/ArrowRenderer.h"  // Imports project declarations from overlay/ArrowRenderer.h.
+#include "shared/DisplayInfo.h"  // Imports project declarations from shared/DisplayInfo.h.
+#include "shared/Geometry.h"  // Imports project declarations from shared/Geometry.h.
 
-namespace fh6 {  // codex-line-comment: documents this line.
+namespace fh6 {  // Places the following declarations inside namespace fh6.
 
-class OverlayWindow {  // codex-line-comment: documents this line.
- public:  // codex-line-comment: documents this line.
-  OverlayWindow();  // codex-line-comment: documents this line.
-  ~OverlayWindow();  // codex-line-comment: documents this line.
+class OverlayWindow {  // Declares the OverlayWindow class interface and members.
+ public:  // Makes the following members part of the public API.
+  OverlayWindow();  // Invokes OverlayWindow with the supplied arguments.
+  ~OverlayWindow();  // Executes ~OverlayWindow().
 
-  bool create(const DisplayInfo& display);  // codex-line-comment: documents this line.
-  void showArrow();  // codex-line-comment: documents this line.
-  void hideArrow();  // codex-line-comment: documents this line.
-  void centerOnDisplay(const DisplayInfo& display);  // codex-line-comment: documents this line.
-  void ensureClickThrough();  // codex-line-comment: documents this line.
-  void destroy();  // codex-line-comment: documents this line.
-  void setArrowSize(const Size& size);  // codex-line-comment: documents this line.
+  bool create(const DisplayInfo& display);  // Declares function create for callers.
+  void showArrow();  // Declares function showArrow for callers.
+  void hideArrow();  // Declares function hideArrow for callers.
+  void centerOnDisplay(const DisplayInfo& display);  // Declares function centerOnDisplay for callers.
+  void ensureClickThrough();  // Declares function ensureClickThrough for callers.
+  void destroy();  // Declares function destroy for callers.
+  void setArrowSize(const Size& size);  // Declares function setArrowSize for callers.
 
-  [[nodiscard]] bool isCreated() const;  // codex-line-comment: documents this line.
-  [[nodiscard]] bool isVisible() const;  // codex-line-comment: documents this line.
+  [[nodiscard]] bool isCreated() const;  // Declares isCreated and marks its return value as important.
+  [[nodiscard]] bool isVisible() const;  // Declares isVisible and marks its return value as important.
 
- private:  // codex-line-comment: documents this line.
-  ArrowRenderer renderer_{};  // codex-line-comment: documents this line.
-  DisplayInfo targetDisplay_{};  // codex-line-comment: documents this line.
-  bool clickThrough_{true};  // codex-line-comment: documents this line.
-  bool visible_{false};  // codex-line-comment: documents this line.
-  void* nativeWindow_{nullptr};  // codex-line-comment: documents this line.
-};  // codex-line-comment: documents this line.
+ private:  // Makes the following members private implementation details.
+  ArrowRenderer renderer_{};  // Declares renderer_ with value initialization.
+  DisplayInfo targetDisplay_{};  // Declares targetDisplay_ with value initialization.
+  bool clickThrough_{true};  // Declares clickThrough_ and initializes it with true.
+  bool visible_{false};  // Declares visible_ and initializes it with false.
+  void* nativeWindow_{nullptr};  // Declares nativeWindow_ and initializes it with nullptr.
+};  // Ends the current type, struct, or initializer declaration.
 
-}  // namespace fh6  // codex-line-comment: documents this line.
+}  // Ends the current code block.

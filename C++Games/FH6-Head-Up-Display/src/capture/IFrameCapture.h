@@ -1,20 +1,20 @@
-#pragma once  // codex-line-comment: documents this line.
+#pragma once  // Prevents this header from being included more than once.
 
-#include <optional>  // codex-line-comment: documents this line.
+#include <optional>  // Imports the optional standard library declarations used in this file.
 
-#include "capture/Frame.h"  // codex-line-comment: documents this line.
-#include "shared/DisplayInfo.h"  // codex-line-comment: documents this line.
+#include "capture/Frame.h"  // Imports project declarations from capture/Frame.h.
+#include "shared/DisplayInfo.h"  // Imports project declarations from shared/DisplayInfo.h.
 
-namespace fh6 {  // codex-line-comment: documents this line.
+namespace fh6 {  // Places the following declarations inside namespace fh6.
 
-class IFrameCapture {  // codex-line-comment: documents this line.
- public:  // codex-line-comment: documents this line.
-  virtual ~IFrameCapture() = default;  // codex-line-comment: documents this line.
+class IFrameCapture {  // Declares the IFrameCapture class interface and members.
+ public:  // Makes the following members part of the public API.
+  virtual ~IFrameCapture() = default;  // Sets virtual ~IFrameCapture() to default.
 
-  virtual bool start(const DisplayInfo& display) = 0;  // codex-line-comment: documents this line.
-  [[nodiscard]] virtual std::optional<Frame> captureFrame() = 0;  // codex-line-comment: documents this line.
-  virtual void stop() = 0;  // codex-line-comment: documents this line.
-  [[nodiscard]] virtual bool isAvailable() const = 0;  // codex-line-comment: documents this line.
-};  // codex-line-comment: documents this line.
+  virtual bool start(const DisplayInfo& display) = 0;  // Sets virtual bool start(const DisplayInfo& display) to 0.
+  [[nodiscard]] virtual std::optional<Frame> captureFrame() = 0;  // Sets [[nodiscard]] virtual std::optional<Frame> captureFrame() to 0.
+  virtual void stop() = 0;  // Sets virtual void stop() to 0.
+  [[nodiscard]] virtual bool isAvailable() const = 0;  // Sets [[nodiscard]] virtual bool isAvailable() const to 0.
+};  // Ends the current type, struct, or initializer declaration.
 
-}  // namespace fh6  // codex-line-comment: documents this line.
+}  // Ends the current code block.

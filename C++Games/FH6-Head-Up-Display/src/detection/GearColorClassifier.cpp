@@ -1,113 +1,120 @@
-#include "detection/GearColorClassifier.h"  // codex-line-comment: documents this line.
+#include "detection/GearColorClassifier.h"  // Imports project declarations from detection/GearColorClassifier.h.
 
-#include <algorithm>  // codex-line-comment: documents this line.
-#include <cmath>  // codex-line-comment: documents this line.
+#include <algorithm>  // Imports the algorithm standard library declarations used in this file.
+#include <cmath>  // Imports the cmath standard library declarations used in this file.
 
-namespace fh6 {  // codex-line-comment: documents this line.
+namespace fh6 {  // Places the following declarations inside namespace fh6.
 
-GearColorClassifier::GearColorClassifier(ColorThresholds thresholds) : thresholds_(thresholds) {}  // codex-line-comment: documents this line.
+GearColorClassifier::GearColorClassifier(ColorThresholds thresholds) : thresholds_(thresholds) {}  // Finishes this initializer entry for the surrounding aggregate.
 
-GearColorState GearColorClassifier::classify(const FrameRegion& region) const {  // codex-line-comment: documents this line.
-  if (region.empty()) {  // codex-line-comment: documents this line.
-    return GearColorState::Unknown;  // codex-line-comment: documents this line.
-  }  // codex-line-comment: documents this line.
+GearColorState GearColorClassifier::classify(const FrameRegion& region) const {  // Implements GearColorClassifier::classify.
+  if (region.empty()) {  // Guards the following work behind the condition region.empty().
+    return GearColorState::Unknown;  // Returns GearColorState::Unknown to the caller.
+  }  // Ends the current code block.
 
-  const int side = std::min(region.bounds().width, region.bounds().height);  // codex-line-comment: documents this line.
-  const auto redWidgetStats = calculateWidgetMatchStats(region, thresholds_.red);  // codex-line-comment: documents this line.
-  const auto whiteWidgetStats = calculateWidgetMatchStats(region, thresholds_.white);  // codex-line-comment: documents this line.
+  const int side = std::min(region.bounds().width, region.bounds().height);  // Sets const int side to std::min(region.bounds().width, region.bounds().height).
+  const auto widgetStats = calculateWidgetColorStats(region);  // Sets const auto widgetStats to calculateWidgetColorStats(region).
 
-  if (hasRedGearAndRing(redWidgetStats, side)) {  // codex-line-comment: documents this line.
-    return GearColorState::Red;  // codex-line-comment: documents this line.
-  }  // codex-line-comment: documents this line.
+  if (hasRedGearAndRing(widgetStats.red, side)) {  // Guards the following work behind the condition hasRedGearAndRing(widgetStats.red, side).
+    return GearColorState::Red;  // Returns GearColorState::Red to the caller.
+  }  // Ends the current code block.
 
-  if (hasWhiteGearSignal(whiteWidgetStats, side)) {  // codex-line-comment: documents this line.
-    return GearColorState::White;  // codex-line-comment: documents this line.
-  }  // codex-line-comment: documents this line.
+  if (hasWhiteGearSignal(widgetStats.white, side)) {  // Guards the following work behind the condition hasWhiteGearSignal(widgetStats.white, side).
+    return GearColorState::White;  // Returns GearColorState::White to the caller.
+  }  // Ends the current code block.
 
-  const auto whiteStats = calculateMatchStats(region, thresholds_.white);  // codex-line-comment: documents this line.
+  const auto whiteStats = calculateMatchStats(region, thresholds_.white);  // Sets const auto whiteStats to calculateMatchStats(region, thresholds_.white).
 
-  if (hasEnoughGlyphPixels(whiteStats)) {  // codex-line-comment: documents this line.
-    return GearColorState::White;  // codex-line-comment: documents this line.
-  }  // codex-line-comment: documents this line.
+  if (hasEnoughGlyphPixels(whiteStats)) {  // Guards the following work behind the condition hasEnoughGlyphPixels(whiteStats).
+    return GearColorState::White;  // Returns GearColorState::White to the caller.
+  }  // Ends the current code block.
 
-  return GearColorState::Unknown;  // codex-line-comment: documents this line.
-}  // codex-line-comment: documents this line.
+  return GearColorState::Unknown;  // Returns GearColorState::Unknown to the caller.
+}  // Ends the current code block.
 
-void GearColorClassifier::updateThresholds(const ColorThresholds& thresholds) {  // codex-line-comment: documents this line.
-  thresholds_ = thresholds;  // codex-line-comment: documents this line.
-}  // codex-line-comment: documents this line.
+void GearColorClassifier::updateThresholds(const ColorThresholds& thresholds) {  // Implements GearColorClassifier::updateThresholds.
+  thresholds_ = thresholds;  // Sets thresholds_ to thresholds.
+}  // Ends the current code block.
 
-GearColorClassifier::MatchStats GearColorClassifier::calculateMatchStats(  // codex-line-comment: documents this line.
-    const FrameRegion& region, const ColorThreshold& target) const {  // codex-line-comment: documents this line.
-  const auto pixels = region.pixels();  // codex-line-comment: documents this line.
-  if (pixels.empty()) {  // codex-line-comment: documents this line.
-    return {};  // codex-line-comment: documents this line.
-  }  // codex-line-comment: documents this line.
+GearColorClassifier::MatchStats GearColorClassifier::calculateMatchStats(  // Implements GearColorClassifier::calculateMatchStats.
+    const FrameRegion& region, const ColorThreshold& target) const {  // Starts a multi-line initializer or scope for const FrameRegion& region, const ColorThreshold& target) const.
+  const auto pixels = region.pixels();  // Sets const auto pixels to region.pixels().
+  if (pixels.empty()) {  // Guards the following work behind the condition pixels.empty().
+    return {};  // Returns {} to the caller.
+  }  // Ends the current code block.
 
-  int matches = 0;  // codex-line-comment: documents this line.
-  for (const auto& pixel : pixels) {  // codex-line-comment: documents this line.
-    if (target.matches(pixel)) {  // codex-line-comment: documents this line.
-      ++matches;  // codex-line-comment: documents this line.
-    }  // codex-line-comment: documents this line.
-  }  // codex-line-comment: documents this line.
+  int matches = 0;  // Sets int matches to 0.
+  for (const auto& pixel : pixels) {  // Iterates with loop control const auto& pixel : pixels.
+    if (target.matches(pixel)) {  // Guards the following work behind the condition target.matches(pixel).
+      ++matches;  // Increments matches by one.
+    }  // Ends the current code block.
+  }  // Ends the current code block.
 
-  return MatchStats{  // codex-line-comment: documents this line.
-      matches,  // codex-line-comment: documents this line.
-      static_cast<float>(matches) / static_cast<float>(pixels.size()),  // codex-line-comment: documents this line.
-  };  // codex-line-comment: documents this line.
-}  // codex-line-comment: documents this line.
+  return MatchStats{  // Starts returning a MatchStats aggregate value.
+      matches,  // Supplies matches to the surrounding call or initializer.
+      static_cast<float>(matches) / static_cast<float>(pixels.size()),  // Supplies static_cast<float>(matches) / static_cast<float>(pixels.size()) to the surrounding call or initializer.
+  };  // Ends the current type, struct, or initializer declaration.
+}  // Ends the current code block.
 
-GearColorClassifier::WidgetMatchStats GearColorClassifier::calculateWidgetMatchStats(  // codex-line-comment: documents this line.
-    const FrameRegion& region, const ColorThreshold& target) const {  // codex-line-comment: documents this line.
-  const auto pixels = region.pixels();  // codex-line-comment: documents this line.
-  const int width = region.bounds().width;  // codex-line-comment: documents this line.
-  const int height = region.bounds().height;  // codex-line-comment: documents this line.
-  if (pixels.empty() || width <= 0 || height <= 0) {  // codex-line-comment: documents this line.
-    return {};  // codex-line-comment: documents this line.
-  }  // codex-line-comment: documents this line.
+GearColorClassifier::WidgetColorStats GearColorClassifier::calculateWidgetColorStats(  // Implements GearColorClassifier::calculateWidgetColorStats.
+    const FrameRegion& region) const {  // Starts a multi-line initializer or scope for const FrameRegion& region) const.
+  const auto pixels = region.pixels();  // Sets const auto pixels to region.pixels().
+  const int width = region.bounds().width;  // Sets const int width to region.bounds().width.
+  const int height = region.bounds().height;  // Sets const int height to region.bounds().height.
+  if (pixels.empty() || width <= 0 || height <= 0) {  // Guards the following work behind the condition pixels.empty() || width <= 0 || height <= 0.
+    return {};  // Returns {} to the caller.
+  }  // Ends the current code block.
 
-  const double centerX = (static_cast<double>(width) - 1.0) / 2.0;  // codex-line-comment: documents this line.
-  const double centerY = (static_cast<double>(height) - 1.0) / 2.0;  // codex-line-comment: documents this line.
-  const double side = static_cast<double>(std::min(width, height));  // codex-line-comment: documents this line.
+  const double centerX = (static_cast<double>(width) - 1.0) / 2.0;  // Sets const double centerX to (static_cast<double>(width) - 1.0) / 2.0.
+  const double centerY = (static_cast<double>(height) - 1.0) / 2.0;  // Sets const double centerY to (static_cast<double>(height) - 1.0) / 2.0.
+  const double side = static_cast<double>(std::min(width, height));  // Sets const double side to static_cast<double>(std::min(width, height)).
 
-  WidgetMatchStats stats{};  // codex-line-comment: documents this line.
-  for (int y = 0; y < height; ++y) {  // codex-line-comment: documents this line.
-    for (int x = 0; x < width; ++x) {  // codex-line-comment: documents this line.
-      const double dx = static_cast<double>(x) - centerX;  // codex-line-comment: documents this line.
-      const double dy = static_cast<double>(y) - centerY;  // codex-line-comment: documents this line.
-      const double radius = std::sqrt(dx * dx + dy * dy) / side;  // codex-line-comment: documents this line.
-      const auto& pixel = pixels[static_cast<std::size_t>(y * width + x)];  // codex-line-comment: documents this line.
+  WidgetColorStats stats{};  // Declares stats with value initialization.
+  for (int y = 0; y < height; ++y) {  // Iterates with loop control int y = 0; y < height; ++y.
+    for (int x = 0; x < width; ++x) {  // Iterates with loop control int x = 0; x < width; ++x.
+      const double dx = static_cast<double>(x) - centerX;  // Sets const double dx to static_cast<double>(x) - centerX.
+      const double dy = static_cast<double>(y) - centerY;  // Sets const double dy to static_cast<double>(y) - centerY.
+      const double radius = std::sqrt(dx * dx + dy * dy) / side;  // Sets const double radius to std::sqrt(dx * dx + dy * dy) / side.
+      const auto& pixel = pixels[static_cast<std::size_t>(y * width + x)];  // Sets const auto& pixel to pixels[static_cast<std::size_t>(y * width + x)].
 
-      if (radius >= 0.22 && radius <= 0.34) {  // codex-line-comment: documents this line.
-        ++stats.ringPixels;  // codex-line-comment: documents this line.
-        if (target.matches(pixel)) {  // codex-line-comment: documents this line.
-          ++stats.ringCount;  // codex-line-comment: documents this line.
-        }  // codex-line-comment: documents this line.
-      } else if (radius <= 0.20) {  // codex-line-comment: documents this line.
-        ++stats.innerPixels;  // codex-line-comment: documents this line.
-        if (target.matches(pixel)) {  // codex-line-comment: documents this line.
-          ++stats.innerCount;  // codex-line-comment: documents this line.
-        }  // codex-line-comment: documents this line.
-      }  // codex-line-comment: documents this line.
-    }  // codex-line-comment: documents this line.
-  }  // codex-line-comment: documents this line.
+      if (radius >= 0.22 && radius <= 0.34) {  // Guards the following work behind the condition radius >= 0.22 && radius <= 0.34.
+        ++stats.red.ringPixels;  // Increments stats.red.ringPixels by one.
+        ++stats.white.ringPixels;  // Increments stats.white.ringPixels by one.
+        if (thresholds_.red.matches(pixel)) {  // Guards the following work behind the condition thresholds_.red.matches(pixel).
+          ++stats.red.ringCount;  // Increments stats.red.ringCount by one.
+        }  // Ends the current code block.
+        if (thresholds_.white.matches(pixel)) {  // Guards the following work behind the condition thresholds_.white.matches(pixel).
+          ++stats.white.ringCount;  // Increments stats.white.ringCount by one.
+        }  // Ends the current code block.
+      } else if (radius <= 0.20) {  // Handles the alternative case where radius <= 0.20 is true.
+        ++stats.red.innerPixels;  // Increments stats.red.innerPixels by one.
+        ++stats.white.innerPixels;  // Increments stats.white.innerPixels by one.
+        if (thresholds_.red.matches(pixel)) {  // Guards the following work behind the condition thresholds_.red.matches(pixel).
+          ++stats.red.innerCount;  // Increments stats.red.innerCount by one.
+        }  // Ends the current code block.
+        if (thresholds_.white.matches(pixel)) {  // Guards the following work behind the condition thresholds_.white.matches(pixel).
+          ++stats.white.innerCount;  // Increments stats.white.innerCount by one.
+        }  // Ends the current code block.
+      }  // Ends the current code block.
+    }  // Ends the current code block.
+  }  // Ends the current code block.
 
-  return stats;  // codex-line-comment: documents this line.
-}  // codex-line-comment: documents this line.
+  return stats;  // Returns stats to the caller.
+}  // Ends the current code block.
 
-bool GearColorClassifier::hasEnoughGlyphPixels(const MatchStats& stats) const {  // codex-line-comment: documents this line.
-  return stats.count >= minimumGlyphPixels_ && stats.ratio >= confidenceThreshold_;  // codex-line-comment: documents this line.
-}  // codex-line-comment: documents this line.
+bool GearColorClassifier::hasEnoughGlyphPixels(const MatchStats& stats) const {  // Implements GearColorClassifier::hasEnoughGlyphPixels.
+  return stats.count >= minimumGlyphPixels_ && stats.ratio >= confidenceThreshold_;  // Returns stats.count >= minimumGlyphPixels_ && stats.ratio >= confidenceThreshold_ to the caller.
+}  // Ends the current code block.
 
-bool GearColorClassifier::hasRedGearAndRing(const WidgetMatchStats& stats, int side) const {  // codex-line-comment: documents this line.
-  const int minimumRingPixels = std::max(24, side / 2);  // codex-line-comment: documents this line.
-  const int minimumInnerPixels = std::max(24, side / 2);  // codex-line-comment: documents this line.
-  return stats.ringCount >= minimumRingPixels && stats.innerCount >= minimumInnerPixels;  // codex-line-comment: documents this line.
-}  // codex-line-comment: documents this line.
+bool GearColorClassifier::hasRedGearAndRing(const WidgetMatchStats& stats, int side) const {  // Implements GearColorClassifier::hasRedGearAndRing.
+  const int minimumRingPixels = std::max(24, side / 2);  // Sets const int minimumRingPixels to std::max(24, side / 2).
+  const int minimumInnerPixels = std::max(24, side / 2);  // Sets const int minimumInnerPixels to std::max(24, side / 2).
+  return stats.ringCount >= minimumRingPixels && stats.innerCount >= minimumInnerPixels;  // Returns stats.ringCount >= minimumRingPixels && stats.innerCount >= minimumInnerPixels to the caller.
+}  // Ends the current code block.
 
-bool GearColorClassifier::hasWhiteGearSignal(const WidgetMatchStats& stats, int side) const {  // codex-line-comment: documents this line.
-  const int minimumInnerPixels = std::max(24, side);  // codex-line-comment: documents this line.
-  return stats.innerCount >= minimumInnerPixels;  // codex-line-comment: documents this line.
-}  // codex-line-comment: documents this line.
+bool GearColorClassifier::hasWhiteGearSignal(const WidgetMatchStats& stats, int side) const {  // Implements GearColorClassifier::hasWhiteGearSignal.
+  const int minimumInnerPixels = std::max(24, side);  // Sets const int minimumInnerPixels to std::max(24, side).
+  return stats.innerCount >= minimumInnerPixels;  // Returns stats.innerCount >= minimumInnerPixels to the caller.
+}  // Ends the current code block.
 
-}  // namespace fh6  // codex-line-comment: documents this line.
+}  // Ends the current code block.

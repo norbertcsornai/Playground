@@ -1,36 +1,36 @@
-#pragma once  // codex-line-comment: documents this line.
+#pragma once  // Prevents this header from being included more than once.
 
-#include <memory>  // codex-line-comment: documents this line.
-#include <optional>  // codex-line-comment: documents this line.
+#include <memory>  // Imports the memory standard library declarations used in this file.
+#include <optional>  // Imports the optional standard library declarations used in this file.
 
-#include "capture/IFrameCapture.h"  // codex-line-comment: documents this line.
+#include "capture/IFrameCapture.h"  // Imports project declarations from capture/IFrameCapture.h.
 
-namespace fh6 {  // codex-line-comment: documents this line.
+namespace fh6 {  // Places the following declarations inside namespace fh6.
 
-class DesktopFrameCapture final : public IFrameCapture {  // codex-line-comment: documents this line.
- public:  // codex-line-comment: documents this line.
-  explicit DesktopFrameCapture(int captureRateLimitFps = 30);  // codex-line-comment: documents this line.
-  ~DesktopFrameCapture() override;  // codex-line-comment: documents this line.
+class DesktopFrameCapture final : public IFrameCapture {  // Declares the DesktopFrameCapture class interface and members.
+ public:  // Makes the following members part of the public API.
+  explicit DesktopFrameCapture(int captureRateLimitFps = 30);  // Declares the explicit DesktopFrameCapture constructor.
+  ~DesktopFrameCapture() override;  // Declares override for use in this scope.
 
-  bool start(const DisplayInfo& display) override;  // codex-line-comment: documents this line.
-  [[nodiscard]] std::optional<Frame> captureFrame() override;  // codex-line-comment: documents this line.
-  void stop() override;  // codex-line-comment: documents this line.
-  [[nodiscard]] bool isAvailable() const override;  // codex-line-comment: documents this line.
-  void handleDisplayChanged(const DisplayInfo& display);  // codex-line-comment: documents this line.
-  void setCaptureRateLimit(int captureRateLimitFps);  // codex-line-comment: documents this line.
+  bool start(const DisplayInfo& display) override;  // Declares override for use in this scope.
+  [[nodiscard]] std::optional<Frame> captureFrame() override;  // Declares override for use in this scope.
+  void stop() override;  // Declares override for use in this scope.
+  [[nodiscard]] bool isAvailable() const override;  // Declares override for use in this scope.
+  void handleDisplayChanged(const DisplayInfo& display);  // Declares function handleDisplayChanged for callers.
+  void setCaptureRateLimit(int captureRateLimitFps);  // Declares function setCaptureRateLimit for callers.
 
- private:  // codex-line-comment: documents this line.
-  struct DxgiCaptureState;  // codex-line-comment: documents this line.
+ private:  // Makes the following members private implementation details.
+  struct DxgiCaptureState;  // Declares the DxgiCaptureState value type and fields.
 
-  [[nodiscard]] bool initializeDxgiCapture();  // codex-line-comment: documents this line.
-  [[nodiscard]] std::optional<Frame> captureFrameWithDxgi(TimePoint timestamp);  // codex-line-comment: documents this line.
-  [[nodiscard]] std::optional<Frame> captureFrameWithGdi(TimePoint timestamp) const;  // codex-line-comment: documents this line.
+  [[nodiscard]] bool initializeDxgiCapture();  // Declares initializeDxgiCapture and marks its return value as important.
+  [[nodiscard]] std::optional<Frame> captureFrameWithDxgi(TimePoint timestamp);  // Declares captureFrameWithDxgi and marks its return value as important.
+  [[nodiscard]] std::optional<Frame> captureFrameWithGdi(TimePoint timestamp) const;  // Declares captureFrameWithGdi and marks its return value as important.
 
-  DisplayInfo display_{};  // codex-line-comment: documents this line.
-  int captureRateLimitFps_{30};  // codex-line-comment: documents this line.
-  bool available_{false};  // codex-line-comment: documents this line.
-  TimePoint lastCapture_{};  // codex-line-comment: documents this line.
-  std::unique_ptr<DxgiCaptureState> dxgiState_{};  // codex-line-comment: documents this line.
-};  // codex-line-comment: documents this line.
+  DisplayInfo display_{};  // Declares display_ with value initialization.
+  int captureRateLimitFps_{30};  // Declares captureRateLimitFps_ and initializes it with 30.
+  bool available_{false};  // Declares available_ and initializes it with false.
+  TimePoint lastCapture_{};  // Declares lastCapture_ with value initialization.
+  std::unique_ptr<DxgiCaptureState> dxgiState_{};  // Declares dxgiState_ with value initialization.
+};  // Ends the current type, struct, or initializer declaration.
 
-}  // namespace fh6  // codex-line-comment: documents this line.
+}  // Ends the current code block.

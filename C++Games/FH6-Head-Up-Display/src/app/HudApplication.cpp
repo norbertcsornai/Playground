@@ -1,116 +1,116 @@
-#include "app/HudApplication.h"  // codex-line-comment: documents this line.
+#include "app/HudApplication.h"  // Imports project declarations from app/HudApplication.h.
 
-#include <chrono>  // codex-line-comment: documents this line.
-#include <csignal>  // codex-line-comment: documents this line.
-#include <memory>  // codex-line-comment: documents this line.
-#include <thread>  // codex-line-comment: documents this line.
+#include <chrono>  // Imports the chrono standard library declarations used in this file.
+#include <csignal>  // Imports the csignal standard library declarations used in this file.
+#include <memory>  // Imports the memory standard library declarations used in this file.
+#include <thread>  // Imports the thread standard library declarations used in this file.
 
-#include "capture/DesktopFrameCapture.h"  // codex-line-comment: documents this line.
+#include "capture/DesktopFrameCapture.h"  // Imports project declarations from capture/DesktopFrameCapture.h.
 
-namespace fh6 {  // codex-line-comment: documents this line.
+namespace fh6 {  // Places the following declarations inside namespace fh6.
 
-HudApplication::HudApplication()  // codex-line-comment: documents this line.
-    : frameCapture_(std::make_unique<DesktopFrameCapture>()), shiftAlertController_(config_.arrowDuration) {}  // codex-line-comment: documents this line.
+HudApplication::HudApplication()  // Begins the multi-line constructor definition for HudApplication.
+    : frameCapture_(std::make_unique<DesktopFrameCapture>()), shiftAlertController_(config_.arrowDuration) {}  // Initializes constructor members with frameCapture_(std::make_unique<DesktopFrameCapture>()), shiftAlertController_(config_.a....
 
-HudApplication::HudApplication(std::unique_ptr<IFrameCapture> frameCapture, ConfigStore configStore)  // codex-line-comment: documents this line.
-    : configStore_(std::move(configStore)), frameCapture_(std::move(frameCapture)) {}  // codex-line-comment: documents this line.
+HudApplication::HudApplication(std::unique_ptr<IFrameCapture> frameCapture, ConfigStore configStore)  // Begins the multi-line constructor definition for HudApplication.
+    : configStore_(std::move(configStore)), frameCapture_(std::move(frameCapture)) {}  // Initializes constructor members with configStore_(std::move(configStore)), frameCapture_(std::move(frameCapture)).
 
-bool HudApplication::initialize() {  // codex-line-comment: documents this line.
-  config_ = configStore_.load();  // codex-line-comment: documents this line.
-  if (auto* desktopCapture = dynamic_cast<DesktopFrameCapture*>(frameCapture_.get())) {  // codex-line-comment: documents this line.
-    desktopCapture->setCaptureRateLimit(config_.captureRateLimitFps);  // codex-line-comment: documents this line.
-  }  // codex-line-comment: documents this line.
-  gearDetector_.setRegion(config_.gearRegion);  // codex-line-comment: documents this line.
-  gearColorClassifier_.updateThresholds(config_.colorThresholds);  // codex-line-comment: documents this line.
-  shiftAlertController_ = ShiftAlertController(config_.arrowDuration);  // codex-line-comment: documents this line.
-  overlayWindow_.setArrowSize(config_.arrowSize);  // codex-line-comment: documents this line.
-  diagnostics_.setEnabled(config_.diagnosticsEnabled);  // codex-line-comment: documents this line.
-  running_ = true;  // codex-line-comment: documents this line.
-  return true;  // codex-line-comment: documents this line.
-}  // codex-line-comment: documents this line.
+bool HudApplication::initialize() {  // Implements HudApplication::initialize.
+  config_ = configStore_.load();  // Sets config_ to configStore_.load().
+  if (auto* desktopCapture = dynamic_cast<DesktopFrameCapture*>(frameCapture_.get())) {  // Guards the following work behind the condition auto* desktopCapture = dynamic_cast<DesktopFrameCapture*>(frameCapture_.get()).
+    desktopCapture->setCaptureRateLimit(config_.captureRateLimitFps);  // Calls setCaptureRateLimit through desktopCapture.
+  }  // Ends the current code block.
+  gearDetector_.setRegion(config_.gearRegion);  // Calls setRegion on gearDetector_.
+  gearColorClassifier_.updateThresholds(config_.colorThresholds);  // Calls updateThresholds on gearColorClassifier_.
+  shiftAlertController_ = ShiftAlertController(config_.arrowDuration);  // Sets shiftAlertController_ to ShiftAlertController(config_.arrowDuration).
+  overlayWindow_.setArrowSize(config_.arrowSize);  // Calls setArrowSize on overlayWindow_.
+  diagnostics_.setEnabled(config_.diagnosticsEnabled);  // Calls setEnabled on diagnostics_.
+  running_ = true;  // Sets running_ to true.
+  return true;  // Returns true to the caller.
+}  // Ends the current code block.
 
-void HudApplication::run() {  // codex-line-comment: documents this line.
-  while (running_) {  // codex-line-comment: documents this line.
-    processFrame();  // codex-line-comment: documents this line.
-    std::this_thread::sleep_for(std::chrono::milliseconds(5));  // codex-line-comment: documents this line.
-  }  // codex-line-comment: documents this line.
-}  // codex-line-comment: documents this line.
+void HudApplication::run() {  // Implements HudApplication::run.
+  while (running_) {  // Repeats while running_ remains true.
+    processFrame();  // Invokes processFrame with the supplied arguments.
+    std::this_thread::sleep_for(std::chrono::milliseconds(5));  // Executes std::this_thread::sleep_for(std::chrono::milliseconds(5)).
+  }  // Ends the current code block.
+}  // Ends the current code block.
 
-void HudApplication::requestStop() {  // codex-line-comment: documents this line.
-  running_ = false;  // codex-line-comment: documents this line.
-}  // codex-line-comment: documents this line.
+void HudApplication::requestStop() {  // Implements HudApplication::requestStop.
+  running_ = false;  // Sets running_ to false.
+}  // Ends the current code block.
 
-void HudApplication::shutdown() {  // codex-line-comment: documents this line.
-  running_ = false;  // codex-line-comment: documents this line.
-  if (frameCapture_) {  // codex-line-comment: documents this line.
-    frameCapture_->stop();  // codex-line-comment: documents this line.
-  }  // codex-line-comment: documents this line.
-  overlayWindow_.destroy();  // codex-line-comment: documents this line.
-}  // codex-line-comment: documents this line.
+void HudApplication::shutdown() {  // Implements HudApplication::shutdown.
+  running_ = false;  // Sets running_ to false.
+  if (frameCapture_) {  // Guards the following work behind the condition frameCapture_.
+    frameCapture_->stop();  // Calls stop through frameCapture_.
+  }  // Ends the current code block.
+  overlayWindow_.destroy();  // Calls destroy on overlayWindow_.
+}  // Ends the current code block.
 
-void HudApplication::processFrame() {  // codex-line-comment: documents this line.
-  if (!gameWindowTracker_.isGameVisible()) {  // codex-line-comment: documents this line.
-    diagnostics_.reportGameDetected(false);  // codex-line-comment: documents this line.
-    enterIdleMode();  // codex-line-comment: documents this line.
-    return;  // codex-line-comment: documents this line.
-  }  // codex-line-comment: documents this line.
+void HudApplication::processFrame() {  // Implements HudApplication::processFrame.
+  if (!gameWindowTracker_.isGameVisible()) {  // Guards the following work behind the condition !gameWindowTracker_.isGameVisible().
+    diagnostics_.reportGameDetected(false);  // Calls reportGameDetected on diagnostics_.
+    enterIdleMode();  // Invokes enterIdleMode with the supplied arguments.
+    return;  // Leaves this function without a return value.
+  }  // Ends the current code block.
 
-  diagnostics_.reportGameDetected(true);  // codex-line-comment: documents this line.
-  ensureCaptureForActiveDisplay();  // codex-line-comment: documents this line.
+  diagnostics_.reportGameDetected(true);  // Calls reportGameDetected on diagnostics_.
+  ensureCaptureForActiveDisplay();  // Invokes ensureCaptureForActiveDisplay with the supplied arguments.
 
-  if (!frameCapture_ || !frameCapture_->isAvailable()) {  // codex-line-comment: documents this line.
-    diagnostics_.reportFrameStatus(FrameStatus::Unavailable);  // codex-line-comment: documents this line.
-    return;  // codex-line-comment: documents this line.
-  }  // codex-line-comment: documents this line.
+  if (!frameCapture_ || !frameCapture_->isAvailable()) {  // Guards the following work behind the condition !frameCapture_ || !frameCapture_->isAvailable().
+    diagnostics_.reportFrameStatus(FrameStatus::Unavailable);  // Calls reportFrameStatus on diagnostics_.
+    return;  // Leaves this function without a return value.
+  }  // Ends the current code block.
 
-  auto frame = frameCapture_->captureFrame();  // codex-line-comment: documents this line.
-  if (!frame) {  // codex-line-comment: documents this line.
-    diagnostics_.reportFrameStatus(FrameStatus::Idle);  // codex-line-comment: documents this line.
-    return;  // codex-line-comment: documents this line.
-  }  // codex-line-comment: documents this line.
+  auto frame = frameCapture_->captureFrame();  // Sets auto frame to frameCapture_->captureFrame().
+  if (!frame) {  // Guards the following work behind the condition !frame.
+    diagnostics_.reportFrameStatus(FrameStatus::Idle);  // Calls reportFrameStatus on diagnostics_.
+    return;  // Leaves this function without a return value.
+  }  // Ends the current code block.
 
-  lastFrameTime_ = frame->timestamp();  // codex-line-comment: documents this line.
-  diagnostics_.reportFrameStatus(FrameStatus::Capturing);  // codex-line-comment: documents this line.
+  lastFrameTime_ = frame->timestamp();  // Sets lastFrameTime_ to frame->timestamp().
+  diagnostics_.reportFrameStatus(FrameStatus::Capturing);  // Calls reportFrameStatus on diagnostics_.
 
-  auto result = gearDetector_.detectGear(*frame, gearColorClassifier_);  // codex-line-comment: documents this line.
-  diagnostics_.reportDetection(result);  // codex-line-comment: documents this line.
+  auto result = gearDetector_.detectGear(*frame, gearColorClassifier_);  // Sets auto result to gearDetector_.detectGear(*frame, gearColorClassifier_).
+  diagnostics_.reportDetection(result);  // Calls reportDetection on diagnostics_.
 
-  const auto alert = shiftAlertController_.update(result, Clock::now());  // codex-line-comment: documents this line.
-  if (alert.active) {  // codex-line-comment: documents this line.
-    overlayWindow_.centerOnDisplay(gameWindowTracker_.getActiveDisplay());  // codex-line-comment: documents this line.
-    overlayWindow_.showArrow();  // codex-line-comment: documents this line.
-    diagnostics_.reportOverlayStatus(OverlayStatus::Visible);  // codex-line-comment: documents this line.
-  } else {  // codex-line-comment: documents this line.
-    overlayWindow_.hideArrow();  // codex-line-comment: documents this line.
-    diagnostics_.reportOverlayStatus(OverlayStatus::Hidden);  // codex-line-comment: documents this line.
-  }  // codex-line-comment: documents this line.
-}  // codex-line-comment: documents this line.
+  const auto alert = shiftAlertController_.update(result, Clock::now());  // Sets const auto alert to shiftAlertController_.update(result, Clock::now()).
+  if (alert.active) {  // Guards the following work behind the condition alert.active.
+    overlayWindow_.centerOnDisplay(gameWindowTracker_.getActiveDisplay());  // Calls centerOnDisplay on overlayWindow_.
+    overlayWindow_.showArrow();  // Calls showArrow on overlayWindow_.
+    diagnostics_.reportOverlayStatus(OverlayStatus::Visible);  // Calls reportOverlayStatus on diagnostics_.
+  } else {  // Handles the fallback case for the preceding condition.
+    overlayWindow_.hideArrow();  // Calls hideArrow on overlayWindow_.
+    diagnostics_.reportOverlayStatus(OverlayStatus::Hidden);  // Calls reportOverlayStatus on diagnostics_.
+  }  // Ends the current code block.
+}  // Ends the current code block.
 
-void HudApplication::enterIdleMode() {  // codex-line-comment: documents this line.
-  if (frameCapture_) {  // codex-line-comment: documents this line.
-    frameCapture_->stop();  // codex-line-comment: documents this line.
-  }  // codex-line-comment: documents this line.
-  shiftAlertController_.reset();  // codex-line-comment: documents this line.
-  overlayWindow_.hideArrow();  // codex-line-comment: documents this line.
-}  // codex-line-comment: documents this line.
+void HudApplication::enterIdleMode() {  // Implements HudApplication::enterIdleMode.
+  if (frameCapture_) {  // Guards the following work behind the condition frameCapture_.
+    frameCapture_->stop();  // Calls stop through frameCapture_.
+  }  // Ends the current code block.
+  shiftAlertController_.reset();  // Calls reset on shiftAlertController_.
+  overlayWindow_.hideArrow();  // Calls hideArrow on overlayWindow_.
+}  // Ends the current code block.
 
-void HudApplication::ensureCaptureForActiveDisplay() {  // codex-line-comment: documents this line.
-  const auto display = gameWindowTracker_.getActiveDisplay();  // codex-line-comment: documents this line.
-  if (display.bounds.empty()) {  // codex-line-comment: documents this line.
-    return;  // codex-line-comment: documents this line.
-  }  // codex-line-comment: documents this line.
+void HudApplication::ensureCaptureForActiveDisplay() {  // Implements HudApplication::ensureCaptureForActiveDisplay.
+  const auto display = gameWindowTracker_.getActiveDisplay();  // Sets const auto display to gameWindowTracker_.getActiveDisplay().
+  if (display.bounds.empty()) {  // Guards the following work behind the condition display.bounds.empty().
+    return;  // Leaves this function without a return value.
+  }  // Ends the current code block.
 
-  if (!overlayWindow_.isCreated()) {  // codex-line-comment: documents this line.
-    if (!overlayWindow_.create(display)) {  // codex-line-comment: documents this line.
-      diagnostics_.reportOverlayStatus(OverlayStatus::Failed);  // codex-line-comment: documents this line.
-    }  // codex-line-comment: documents this line.
-  }  // codex-line-comment: documents this line.
+  if (!overlayWindow_.isCreated()) {  // Guards the following work behind the condition !overlayWindow_.isCreated().
+    if (!overlayWindow_.create(display)) {  // Guards the following work behind the condition !overlayWindow_.create(display).
+      diagnostics_.reportOverlayStatus(OverlayStatus::Failed);  // Calls reportOverlayStatus on diagnostics_.
+    }  // Ends the current code block.
+  }  // Ends the current code block.
 
-  if (frameCapture_ && !frameCapture_->isAvailable()) {  // codex-line-comment: documents this line.
-    if (!frameCapture_->start(display)) {  // codex-line-comment: documents this line.
-      diagnostics_.reportFrameStatus(FrameStatus::Failed);  // codex-line-comment: documents this line.
-    }  // codex-line-comment: documents this line.
-  }  // codex-line-comment: documents this line.
-}  // codex-line-comment: documents this line.
+  if (frameCapture_ && !frameCapture_->isAvailable()) {  // Guards the following work behind the condition frameCapture_ && !frameCapture_->isAvailable().
+    if (!frameCapture_->start(display)) {  // Guards the following work behind the condition !frameCapture_->start(display).
+      diagnostics_.reportFrameStatus(FrameStatus::Failed);  // Calls reportFrameStatus on diagnostics_.
+    }  // Ends the current code block.
+  }  // Ends the current code block.
+}  // Ends the current code block.
 
-}  // namespace fh6  // codex-line-comment: documents this line.
+}  // Ends the current code block.
