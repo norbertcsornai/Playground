@@ -23,8 +23,10 @@ class GearColorClassifier {  // Declares the GearColorClassifier class interface
   struct WidgetMatchStats {  // Declares the WidgetMatchStats value type and fields.
     int ringCount{0};  // Declares ringCount and initializes it with 0.
     int innerCount{0};  // Declares innerCount and initializes it with 0.
+    int backgroundCount{0};  // Counts matching pixels outside the expected gear and ring mask.
     int ringPixels{0};  // Declares ringPixels and initializes it with 0.
     int innerPixels{0};  // Declares innerPixels and initializes it with 0.
+    int backgroundPixels{0};  // Counts inspected pixels outside the expected gear and ring mask.
   };  // Ends the current type, struct, or initializer declaration.
 
   struct WidgetColorStats {  // Declares the WidgetColorStats value type and fields.

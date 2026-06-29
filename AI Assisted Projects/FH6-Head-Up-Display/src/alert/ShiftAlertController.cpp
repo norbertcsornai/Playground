@@ -9,17 +9,18 @@ ShiftAlertState ShiftAlertController::update(const GearDetectionResult& result, 
   bool triggered = false;  // Sets bool triggered to false.
 
   if (result.isConfident() && result.colorState == GearColorState::Red) {  // Guards the following work behind the condition result.isConfident() && result.colorState == GearColorState::Red.
-    triggered = !triggeredForCurrentRed_;  // Sets triggered to !triggeredForCurrentRed_.
-    triggeredForCurrentRed_ = true;  // Sets triggeredForCurrentRed_ to true.
-    alertActiveUntil_ = now + arrowDuration_;  // Sets alertActiveUntil_ to now + arrowDuration_.
+    if (armedByWhite_) {  // Guards the following work behind the condition armedByWhite_.
+      triggered = !triggeredForCurrentRed_;  // Sets triggered to !triggeredForCurrentRed_.
+      triggeredForCurrentRed_ = true;  // Sets triggeredForCurrentRed_ to true.
+      alertActiveUntil_ = now + arrowDuration_;  // Sets alertActiveUntil_ to now + arrowDuration_.
+    }  // Ends the current code block.
   } else if (result.isConfident() && result.colorState == GearColorState::White) {  // Handles the alternative case where result.isConfident() && result.colorState == GearColorState::White is true.
+    armedByWhite_ = true;  // Sets armedByWhite_ to true.
+    triggeredForCurrentRed_ = false;  // Sets triggeredForCurrentRed_ to false.
     alertActiveUntil_ = now;  // Sets alertActiveUntil_ to now.
   }  // Ends the current code block.
 
   if (result.colorState != GearColorState::Unknown && result.isConfident()) {  // Guards the following work behind the condition result.colorState != GearColorState::Unknown && result.isConfident().
-    if (result.colorState == GearColorState::White) {  // Guards the following work behind the condition result.colorState == GearColorState::White.
-      triggeredForCurrentRed_ = false;  // Sets triggeredForCurrentRed_ to false.
-    }  // Ends the current code block.
     previousColorState_ = result.colorState;  // Sets previousColorState_ to result.colorState.
   }  // Ends the current code block.
 
@@ -33,6 +34,7 @@ ShiftAlertState ShiftAlertController::update(const GearDetectionResult& result, 
 void ShiftAlertController::reset() {  // Implements ShiftAlertController::reset.
   previousColorState_ = GearColorState::Unknown;  // Sets previousColorState_ to GearColorState::Unknown.
   alertActiveUntil_ = {};  // Sets alertActiveUntil_ to {}.
+  armedByWhite_ = false;  // Sets armedByWhite_ to false.
   triggeredForCurrentRed_ = false;  // Sets triggeredForCurrentRed_ to false.
 }  // Ends the current code block.
 

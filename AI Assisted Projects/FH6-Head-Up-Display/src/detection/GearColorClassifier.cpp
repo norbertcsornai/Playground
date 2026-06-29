@@ -15,12 +15,12 @@ GearColorState GearColorClassifier::classify(const FrameRegion& region) const { 
   const int side = std::min(region.bounds().width, region.bounds().height);  // Sets const int side to std::min(region.bounds().width, region.bounds().height).
   const auto widgetStats = calculateWidgetColorStats(region);  // Sets const auto widgetStats to calculateWidgetColorStats(region).
 
-  if (hasRedGearAndRing(widgetStats.red, side)) {  // Guards the following work behind the condition hasRedGearAndRing(widgetStats.red, side).
-    return GearColorState::Red;  // Returns GearColorState::Red to the caller.
-  }  // Ends the current code block.
-
   if (hasWhiteGearSignal(widgetStats.white, side)) {  // Guards the following work behind the condition hasWhiteGearSignal(widgetStats.white, side).
     return GearColorState::White;  // Returns GearColorState::White to the caller.
+  }  // Ends the current code block.
+
+  if (hasRedGearAndRing(widgetStats.red, side)) {  // Guards the following work behind the condition hasRedGearAndRing(widgetStats.red, side).
+    return GearColorState::Red;  // Returns GearColorState::Red to the caller.
   }  // Ends the current code block.
 
   const auto whiteStats = calculateMatchStats(region, thresholds_.white);  // Sets const auto whiteStats to calculateMatchStats(region, thresholds_.white).
@@ -95,6 +95,15 @@ GearColorClassifier::WidgetColorStats GearColorClassifier::calculateWidgetColorS
         if (thresholds_.white.matches(pixel)) {  // Guards the following work behind the condition thresholds_.white.matches(pixel).
           ++stats.white.innerCount;  // Increments stats.white.innerCount by one.
         }  // Ends the current code block.
+      } else if (radius >= 0.38) {  // Handles pixels far enough from the expected red ring to be treated as background.
+        ++stats.red.backgroundPixels;  // Increments stats.red.backgroundPixels by one.
+        ++stats.white.backgroundPixels;  // Increments stats.white.backgroundPixels by one.
+        if (thresholds_.red.matches(pixel)) {  // Guards the following work behind the condition thresholds_.red.matches(pixel).
+          ++stats.red.backgroundCount;  // Increments stats.red.backgroundCount by one.
+        }  // Ends the current code block.
+        if (thresholds_.white.matches(pixel)) {  // Guards the following work behind the condition thresholds_.white.matches(pixel).
+          ++stats.white.backgroundCount;  // Increments stats.white.backgroundCount by one.
+        }  // Ends the current code block.
       }  // Ends the current code block.
     }  // Ends the current code block.
   }  // Ends the current code block.
@@ -109,7 +118,16 @@ bool GearColorClassifier::hasEnoughGlyphPixels(const MatchStats& stats) const { 
 bool GearColorClassifier::hasRedGearAndRing(const WidgetMatchStats& stats, int side) const {  // Implements GearColorClassifier::hasRedGearAndRing.
   const int minimumRingPixels = std::max(24, side / 2);  // Sets const int minimumRingPixels to std::max(24, side / 2).
   const int minimumInnerPixels = std::max(24, side / 2);  // Sets const int minimumInnerPixels to std::max(24, side / 2).
-  return stats.ringCount >= minimumRingPixels && stats.innerCount >= minimumInnerPixels;  // Returns stats.ringCount >= minimumRingPixels && stats.innerCount >= minimumInnerPixels to the caller.
+  if (stats.ringCount < minimumRingPixels || stats.innerCount < minimumInnerPixels) {  // Guards the following work behind weak red ring or gear evidence.
+    return false;  // Returns false to the caller.
+  }  // Ends the current code block.
+  if (stats.backgroundPixels <= 0) {  // Guards the following work behind the condition stats.backgroundPixels <= 0.
+    return true;  // Returns true to the caller.
+  }  // Ends the current code block.
+  const double ringRatio = static_cast<double>(stats.ringCount) / static_cast<double>(stats.ringPixels);  // Sets const double ringRatio to the red share inside the expected ring.
+  const double backgroundRatio = static_cast<double>(stats.backgroundCount) / static_cast<double>(stats.backgroundPixels);  // Sets const double backgroundRatio to the red share outside the expected gear mask.
+  const bool redLooksLikeBackground = backgroundRatio > 0.18 && backgroundRatio > ringRatio * 0.45;  // Sets const bool redLooksLikeBackground to the broad-background-red rejection check.
+  return !redLooksLikeBackground;  // Returns whether the red shape looks like the gear widget instead of the background.
 }  // Ends the current code block.
 
 bool GearColorClassifier::hasWhiteGearSignal(const WidgetMatchStats& stats, int side) const {  // Implements GearColorClassifier::hasWhiteGearSignal.

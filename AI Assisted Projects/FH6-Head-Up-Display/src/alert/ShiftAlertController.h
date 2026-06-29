@@ -21,6 +21,7 @@ class ShiftAlertController {  // Declares the ShiftAlertController class interfa
   GearColorState previousColorState_{GearColorState::Unknown};  // Declares previousColorState_ and initializes it with GearColorState::Unknown.
   TimePoint alertActiveUntil_{};  // Declares alertActiveUntil_ with value initialization.
   std::chrono::milliseconds arrowDuration_{1500};  // Declares arrowDuration_ and initializes it with 1500.
+  bool armedByWhite_{false};  // Tracks whether a confident white gear frame has armed the next red trigger.
   bool triggeredForCurrentRed_{false};  // Declares triggeredForCurrentRed_ and initializes it with false.
 };  // Ends the current type, struct, or initializer declaration.
 
