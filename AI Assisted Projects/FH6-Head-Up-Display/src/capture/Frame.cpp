@@ -48,7 +48,13 @@ bool FrameRegion::empty() const {  // Implements FrameRegion::empty.
 }  // Ends the current code block.
 
 Frame::Frame(int width, int height, std::vector<Color> pixels, TimePoint timestamp)  // Begins the multi-line constructor definition for Frame.
-    : width_(width), height_(height), pixels_(std::move(pixels)), timestamp_(timestamp) {}  // Initializes constructor members with width_(width), height_(height), pixels_(std::move(pixels)), timestamp_(timestamp).
+    : width_(width), height_(height), sourceWidth_(width), sourceHeight_(height),  // Initializes a whole-display frame, whose source size equals its own size.
+      pixels_(std::move(pixels)), timestamp_(timestamp) {}  // Initializes constructor members with pixels_(std::move(pixels)), timestamp_(timestamp).
+
+Frame::Frame(Rect origin, int sourceWidth, int sourceHeight, std::vector<Color> pixels,  // Begins the multi-line sub-rectangle constructor definition for Frame.
+             TimePoint timestamp)  // Starts a multi-line initializer or scope for TimePoint timestamp).
+    : width_(origin.width), height_(origin.height), origin_(origin), sourceWidth_(sourceWidth),  // Initializes constructor members from the captured sub-rectangle.
+      sourceHeight_(sourceHeight), pixels_(std::move(pixels)), timestamp_(timestamp) {}  // Initializes constructor members with sourceHeight_(sourceHeight), pixels_(std::move(pixels)), timestamp_(timestamp).
 
 int Frame::width() const {  // Implements Frame::width.
   return width_;  // Returns width_ to the caller.
@@ -56,6 +62,18 @@ int Frame::width() const {  // Implements Frame::width.
 
 int Frame::height() const {  // Implements Frame::height.
   return height_;  // Returns height_ to the caller.
+}  // Ends the current code block.
+
+const Rect& Frame::origin() const {  // Implements Frame::origin.
+  return origin_;  // Returns origin_ to the caller.
+}  // Ends the current code block.
+
+int Frame::sourceWidth() const {  // Implements Frame::sourceWidth.
+  return sourceWidth_;  // Returns sourceWidth_ to the caller.
+}  // Ends the current code block.
+
+int Frame::sourceHeight() const {  // Implements Frame::sourceHeight.
+  return sourceHeight_;  // Returns sourceHeight_ to the caller.
 }  // Ends the current code block.
 
 TimePoint Frame::timestamp() const {  // Implements Frame::timestamp.
@@ -71,10 +89,17 @@ std::optional<Rect> Frame::clippedBounds(const Rect& region) const {  // Impleme
     return std::nullopt;  // Returns std::nullopt to the caller.
   }  // Ends the current code block.
 
-  const int left = std::clamp(region.x, 0, width_);  // Sets const int left to std::clamp(region.x, 0, width_).
-  const int top = std::clamp(region.y, 0, height_);  // Sets const int top to std::clamp(region.y, 0, height_).
-  const int right = std::clamp(region.x + region.width, 0, width_);  // Sets const int right to std::clamp(region.x + region.width, 0, width_).
-  const int bottom = std::clamp(region.y + region.height, 0, height_);  // Sets const int bottom to std::clamp(region.y + region.height, 0, height_).
+  // Clamp against the span this frame actually holds, which for a sub-rectangle frame starts at
+  // origin_ rather than at 0. For a whole-display frame origin_ is {0,0} and this is unchanged.
+  const int minX = origin_.x;  // Sets const int minX to the first display column held by this frame.
+  const int minY = origin_.y;  // Sets const int minY to the first display row held by this frame.
+  const int maxX = origin_.x + width_;  // Sets const int maxX to one past the last display column held.
+  const int maxY = origin_.y + height_;  // Sets const int maxY to one past the last display row held.
+
+  const int left = std::clamp(region.x, minX, maxX);  // Sets const int left to std::clamp(region.x, minX, maxX).
+  const int top = std::clamp(region.y, minY, maxY);  // Sets const int top to std::clamp(region.y, minY, maxY).
+  const int right = std::clamp(region.x + region.width, minX, maxX);  // Sets const int right to std::clamp(region.x + region.width, minX, maxX).
+  const int bottom = std::clamp(region.y + region.height, minY, maxY);  // Sets const int bottom to std::clamp(region.y + region.height, minY, maxY).
 
   if (right <= left || bottom <= top) {  // Guards the following work behind the condition right <= left || bottom <= top.
     return std::nullopt;  // Returns std::nullopt to the caller.
@@ -93,7 +118,9 @@ std::optional<FrameRegion> Frame::crop(const Rect& region) const {  // Implement
   auto destination = cropped.begin();  // Sets auto destination to cropped.begin().
 
   for (int y = bounds->y; y < bounds->y + bounds->height; ++y) {  // Iterates with loop control int y = bounds->y; y < bounds->y + bounds->height; ++y.
-    const auto rowOffset = static_cast<std::size_t>(y * width_ + bounds->x);  // Sets const auto rowOffset to static_cast<std::size_t>(y * width_ + bounds->x).
+    // bounds is in display coordinates, so shift by origin_ to index into this frame's buffer.
+    const auto rowOffset =  // Sets const auto rowOffset to the buffer index of this row's first pixel.
+        static_cast<std::size_t>((y - origin_.y) * width_ + (bounds->x - origin_.x));  // Executes static_cast<std::size_t>((y - origin_.y) * width_ + (bounds->x - origin_.x)).
     destination = std::copy_n(pixels_.begin() + static_cast<std::ptrdiff_t>(rowOffset), bounds->width,  // Sets destination to std::copy_n(pixels_.begin() + static_cast<std::ptrdiff_t>(rowOffset), bounds->width.
                               destination);  // Supplies destination to the surrounding call or initializer.
   }  // Ends the current code block.

@@ -126,7 +126,11 @@ bool GearColorClassifier::hasRedGearAndRing(const WidgetMatchStats& stats, int s
   }  // Ends the current code block.
   const double ringRatio = static_cast<double>(stats.ringCount) / static_cast<double>(stats.ringPixels);  // Sets const double ringRatio to the red share inside the expected ring.
   const double backgroundRatio = static_cast<double>(stats.backgroundCount) / static_cast<double>(stats.backgroundPixels);  // Sets const double backgroundRatio to the red share outside the expected gear mask.
-  const bool redLooksLikeBackground = backgroundRatio > 0.18 && backgroundRatio > ringRatio * 0.45;  // Sets const bool redLooksLikeBackground to the broad-background-red rejection check.
+  // A genuinely lit ring can bloom or anti-alias red past its band into this background sample, and
+  // a thin ring can also leave ringRatio well below 1.0, so only reject when the background is
+  // nearly as saturated as the ring itself -- the signature of a broad unrelated red field rather
+  // than bleed from a real gear-turned-red widget.
+  const bool redLooksLikeBackground = backgroundRatio > 0.5 && backgroundRatio > ringRatio * 0.75;  // Sets const bool redLooksLikeBackground to the broad-background-red rejection check.
   return !redLooksLikeBackground;  // Returns whether the red shape looks like the gear widget instead of the background.
 }  // Ends the current code block.
 

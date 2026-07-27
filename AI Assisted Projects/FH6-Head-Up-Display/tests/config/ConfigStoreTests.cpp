@@ -26,7 +26,7 @@ FH6_TEST(config_store_loads_defaults_when_missing) {  // Starts a multi-line ini
   FH6_REQUIRE(config.gearRegion.width == 420);  // Sets FH6_REQUIRE(config.gearRegion.width to = 420).
   FH6_REQUIRE(config.gearRegion.height == 420);  // Sets FH6_REQUIRE(config.gearRegion.height to = 420).
   FH6_REQUIRE(config.arrowDuration.count() == 1500);  // Sets FH6_REQUIRE(config.arrowDuration.count() to = 1500).
-  FH6_REQUIRE(config.captureRateLimitFps == 30);  // Sets FH6_REQUIRE(config.captureRateLimitFps to = 30).
+  FH6_REQUIRE(config.captureRateLimitFps == 120);  // Sets FH6_REQUIRE(config.captureRateLimitFps to = 120).
 }  // Ends the current code block.
 
 FH6_TEST(config_store_saves_and_loads_values) {  // Starts a multi-line initializer or scope for FH6_TEST(config_store_saves_and_loads_values).

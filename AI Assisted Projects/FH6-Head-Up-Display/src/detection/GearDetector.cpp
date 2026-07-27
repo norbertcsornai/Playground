@@ -8,6 +8,10 @@ void GearDetector::setRegion(const Rect& region) {  // Implements GearDetector::
   calibration_.setManualRegion(region);  // Calls setManualRegion on calibration_.
 }  // Ends the current code block.
 
+Rect GearDetector::gearRegionForDisplay(int width, int height) const {  // Implements GearDetector::gearRegionForDisplay.
+  return calibration_.getGearRegionForSize(width, height);  // Returns calibration_.getGearRegionForSize(width, height) to the caller.
+}  // Ends the current code block.
+
 GearDetectionResult GearDetector::detectGear(const Frame& frame,  // Implements GearDetector::detectGear.
                                              const GearColorClassifier& classifier) const {  // Starts a multi-line initializer or scope for const GearColorClassifier& classifier) const.
   const auto region = extractGearRegion(frame);  // Sets const auto region to extractGearRegion(frame).

@@ -11,6 +11,10 @@ class GameWindowTracker {  // Declares the GameWindowTracker class interface and
  public:  // Makes the following members part of the public API.
   explicit GameWindowTracker(std::string targetWindowTitle = "Forza Horizon");  // Declares the explicit GameWindowTracker constructor.
 
+  // findGameWindow(), isGameRunning(), isGameVisible(), and getActiveDisplay() all read state
+  // cached by the most recent refresh() call rather than re-scanning windows themselves, so a
+  // caller that wants current results must call refresh() once per polling cycle first. This
+  // keeps EnumWindows to a single pass per frame instead of once per accessor call.
   [[nodiscard]] std::optional<WindowInfo> findGameWindow();  // Declares findGameWindow and marks its return value as important.
   [[nodiscard]] bool isGameRunning();  // Declares isGameRunning and marks its return value as important.
   [[nodiscard]] bool isGameVisible();  // Declares isGameVisible and marks its return value as important.

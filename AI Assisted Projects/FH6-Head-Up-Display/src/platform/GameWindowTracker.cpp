@@ -11,17 +11,14 @@ GameWindowTracker::GameWindowTracker(std::string targetWindowTitle)  // Begins t
     : targetWindowTitle_(std::move(targetWindowTitle)) {}  // Initializes constructor members with targetWindowTitle_(std::move(targetWindowTitle)).
 
 std::optional<WindowInfo> GameWindowTracker::findGameWindow() {  // Implements GameWindowTracker::findGameWindow.
-  refresh();  // Invokes refresh with the supplied arguments.
-  return gameWindow_;  // Returns gameWindow_ to the caller.
+  return gameWindow_;  // Returns the window found by the most recent refresh() to the caller.
 }  // Ends the current code block.
 
 bool GameWindowTracker::isGameRunning() {  // Implements GameWindowTracker::isGameRunning.
-  refresh();  // Invokes refresh with the supplied arguments.
   return gameWindow_.has_value();  // Returns gameWindow_.has_value() to the caller.
 }  // Ends the current code block.
 
 bool GameWindowTracker::isGameVisible() {  // Implements GameWindowTracker::isGameVisible.
-  refresh();  // Invokes refresh with the supplied arguments.
   if (!gameWindow_) {  // Guards the following work behind the condition !gameWindow_.
     return false;  // Returns false to the caller.
   }  // Ends the current code block.
@@ -35,7 +32,6 @@ bool GameWindowTracker::isGameVisible() {  // Implements GameWindowTracker::isGa
 }  // Ends the current code block.
 
 DisplayInfo GameWindowTracker::getActiveDisplay() {  // Implements GameWindowTracker::getActiveDisplay.
-  refresh();  // Invokes refresh with the supplied arguments.
   return gameWindow_ ? gameWindow_->display : DisplayInfo{};  // Returns gameWindow_ ? gameWindow_->display : DisplayInfo{} to the caller.
 }  // Ends the current code block.
 

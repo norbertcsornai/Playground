@@ -26,8 +26,14 @@ Rect CalibrationService::getGearRegion() const {  // Implements CalibrationServi
 }  // Ends the current code block.
 
 Rect CalibrationService::getGearRegion(const Frame& frame) const {  // Implements CalibrationService::getGearRegion.
+  // Derives from the source display size, not the frame's own size, so the region stays correct
+  // when the frame holds only a captured sub-rectangle of that display.
+  return getGearRegionForSize(frame.sourceWidth(), frame.sourceHeight());  // Returns getGearRegionForSize(frame.sourceWidth(), frame.sourceHeight()) to the caller.
+}  // Ends the current code block.
+
+Rect CalibrationService::getGearRegionForSize(int width, int height) const {  // Implements CalibrationService::getGearRegionForSize.
   if (currentRegion_.x < 0 || currentRegion_.y < 0) {  // Guards the following work behind the condition currentRegion_.x < 0 || currentRegion_.y < 0.
-    return resolveDynamicRegion(frame);  // Returns resolveDynamicRegion(frame) to the caller.
+    return resolveDynamicRegion(width, height);  // Returns resolveDynamicRegion(width, height) to the caller.
   }  // Ends the current code block.
 
   return currentRegion_;  // Returns currentRegion_ to the caller.
@@ -37,16 +43,16 @@ void CalibrationService::resetToDefaults() {  // Implements CalibrationService::
   currentRegion_ = defaultRegion_;  // Sets currentRegion_ to defaultRegion_.
 }  // Ends the current code block.
 
-Rect CalibrationService::resolveDynamicRegion(const Frame& frame) const {  // Implements CalibrationService::resolveDynamicRegion.
-  const int size = std::max(220, static_cast<int>(static_cast<double>(frame.height()) * 0.373));  // Sets const int size to std::max(220, static_cast<int>(static_cast<double>(frame.height()) * 0.373)).
+Rect CalibrationService::resolveDynamicRegion(int displayWidth, int displayHeight) const {  // Implements CalibrationService::resolveDynamicRegion.
+  const int size = std::max(220, static_cast<int>(static_cast<double>(displayHeight) * 0.373));  // Sets const int size to std::max(220, static_cast<int>(static_cast<double>(displayHeight) * 0.373)).
   const int width = size;  // Sets const int width to size.
   const int height = size;  // Sets const int height to size.
-  const int marginX = std::max(12, static_cast<int>(static_cast<double>(frame.width()) * 0.010));  // Sets const int marginX to std::max(12, static_cast<int>(static_cast<double>(frame.width()) * 0.010)).
-  const int marginY = std::max(12, static_cast<int>(static_cast<double>(frame.height()) * 0.018));  // Sets const int marginY to std::max(12, static_cast<int>(static_cast<double>(frame.height()) * 0.018)).
+  const int marginX = std::max(12, static_cast<int>(static_cast<double>(displayWidth) * 0.010));  // Sets const int marginX to std::max(12, static_cast<int>(static_cast<double>(displayWidth) * 0.010)).
+  const int marginY = std::max(12, static_cast<int>(static_cast<double>(displayHeight) * 0.018));  // Sets const int marginY to std::max(12, static_cast<int>(static_cast<double>(displayHeight) * 0.018)).
 
   return Rect{  // Starts returning a Rect aggregate value.
-      frame.width() - width - marginX,  // Supplies frame.width() - width - marginX to the surrounding call or initializer.
-      frame.height() - height - marginY,  // Supplies frame.height() - height - marginY to the surrounding call or initializer.
+      displayWidth - width - marginX,  // Supplies displayWidth - width - marginX to the surrounding call or initializer.
+      displayHeight - height - marginY,  // Supplies displayHeight - height - marginY to the surrounding call or initializer.
       width,  // Supplies width to the surrounding call or initializer.
       height,  // Supplies height to the surrounding call or initializer.
   };  // Ends the current type, struct, or initializer declaration.

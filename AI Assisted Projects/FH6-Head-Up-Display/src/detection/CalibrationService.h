@@ -15,10 +15,11 @@ class CalibrationService {  // Declares the CalibrationService class interface a
   void setManualRegion(const Rect& region);  // Declares function setManualRegion for callers.
   [[nodiscard]] Rect getGearRegion() const;  // Declares getGearRegion and marks its return value as important.
   [[nodiscard]] Rect getGearRegion(const Frame& frame) const;  // Declares getGearRegion and marks its return value as important.
+  [[nodiscard]] Rect getGearRegionForSize(int width, int height) const;  // Declares getGearRegionForSize and marks its return value as important.
   void resetToDefaults();  // Declares function resetToDefaults for callers.
 
  private:  // Makes the following members private implementation details.
-  [[nodiscard]] Rect resolveDynamicRegion(const Frame& frame) const;  // Declares resolveDynamicRegion and marks its return value as important.
+  [[nodiscard]] Rect resolveDynamicRegion(int displayWidth, int displayHeight) const;  // Declares resolveDynamicRegion and marks its return value as important.
 
   Rect defaultRegion_{};  // Declares defaultRegion_ with value initialization.
   Rect currentRegion_{};  // Declares currentRegion_ with value initialization.

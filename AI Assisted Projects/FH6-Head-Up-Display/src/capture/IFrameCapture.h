@@ -15,6 +15,11 @@ class IFrameCapture {  // Declares the IFrameCapture class interface and members
   [[nodiscard]] virtual std::optional<Frame> captureFrame() = 0;  // Sets [[nodiscard]] virtual std::optional<Frame> captureFrame() to 0.
   virtual void stop() = 0;  // Sets virtual void stop() to 0.
   [[nodiscard]] virtual bool isAvailable() const = 0;  // Sets [[nodiscard]] virtual bool isAvailable() const to 0.
+
+  // Restricts capture to the given display-coordinate rect so implementations can skip reading
+  // pixels the caller will never inspect. An empty rect means capture the whole display.
+  // Implementations may ignore this; callers must not assume the returned Frame is cropped.
+  virtual void setRegionOfInterest(const Rect& region) { (void)region; }  // Provides a no-op default for implementations that always capture full frames.
 };  // Ends the current type, struct, or initializer declaration.
 
 }  // Ends the current code block.

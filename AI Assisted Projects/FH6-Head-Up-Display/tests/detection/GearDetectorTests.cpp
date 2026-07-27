@@ -53,6 +53,38 @@ FH6_TEST(gear_detector_classifies_configured_region_color) {  // Starts a multi-
   FH6_REQUIRE(result.region.y == 39);  // Sets FH6_REQUIRE(result.region.y to = 39).
 }  // Ends the current code block.
 
+// Mirrors what the app does in production: capture fetches only the HUD rect that
+// gearRegionForDisplay() reports for the live display, and the detector must still locate the gear
+// inside that sub-rectangle frame. This is the path DesktopFrameCapture's region-of-interest
+// support produces, so a coordinate-mapping mistake between the two would surface here.
+FH6_TEST(gear_detector_reads_gear_from_region_of_interest_frame) {  // Starts a multi-line initializer or scope for gear_detector_reads_gear_from_region_of_interest_frame.
+  constexpr int kDisplayWidth = 1920;  // Defines compile-time constant kDisplayWidth as 1920.
+  constexpr int kDisplayHeight = 1080;  // Defines compile-time constant kDisplayHeight as 1080.
+
+  GearDetector detector;  // Declares detector for use in this scope.
+  GearColorClassifier classifier;  // Declares classifier for use in this scope.
+  detector.setRegion(Rect{-1, -1, 420, 420});  // Selects the dynamic lower-right default region.
+
+  const Rect roi = detector.gearRegionForDisplay(kDisplayWidth, kDisplayHeight);  // Sets const Rect roi to the HUD rect the capture layer would fetch.
+  FH6_REQUIRE(roi.width > 0 && roi.height > 0);  // Requires the reported region to be usable.
+
+  // Paint the gear widget centered in the focus area the detector looks at inside that region,
+  // using buffer-local coordinates (display coordinates minus the region origin).
+  std::vector<Color> pixels(static_cast<std::size_t>(roi.width) * roi.height, Color{20, 20, 20, 255});  // Declares pixels initialized to a dark background.
+  const int focusX = static_cast<int>(static_cast<double>(roi.width) * 0.37);  // Sets const int focusX to the focus area's left offset inside the region.
+  const int focusY = static_cast<int>(static_cast<double>(roi.height) * 0.39);  // Sets const int focusY to the focus area's top offset inside the region.
+  const int focusSize = static_cast<int>(static_cast<double>(roi.width) * 0.37);  // Sets const int focusSize to the focus area's side length.
+  drawGearWidget(pixels, roi.width, focusX + focusSize / 2, focusY + focusSize / 2,  // Invokes drawGearWidget centered on the focus area.
+                 Color{216, 26, 52, 255}, 36, 50, 28);  // Supplies the measured FH6 shift red and widget radii.
+
+  const Frame frame(roi, kDisplayWidth, kDisplayHeight, std::move(pixels));  // Declares a frame holding only the captured HUD region.
+
+  const auto result = detector.detectGear(frame, classifier);  // Sets const auto result to detector.detectGear(frame, classifier).
+
+  FH6_REQUIRE(result.colorState == GearColorState::Red);  // Requires the gear to be found inside the region-of-interest frame.
+  FH6_REQUIRE(result.isConfident());  // Requires the detection to be confident.
+}  // Ends the current code block.
+
 FH6_TEST(gear_detector_ignores_white_speed_text_outside_gear_focus_area) {  // Starts a multi-line initializer or scope for FH6_TEST(gear_detector_ignores_white_speed_text_outside_gear_focus_area).
   std::vector<Color> pixels(420 * 420, Color{20, 20, 20, 255});  // Declares function pixels for callers.
 

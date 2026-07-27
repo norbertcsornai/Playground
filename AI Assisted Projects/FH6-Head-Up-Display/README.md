@@ -79,7 +79,9 @@ Build the app, start Forza Horizon 6, then run:
 .\build\Release\fh6-hud.exe
 ```
 
-For Debug:
+Use the Release build for actual gameplay. The frame pipeline converts captured pixels in a tight
+per-pixel loop, and an MSVC Debug build runs that roughly 14x slower, which is enough on its own to
+delay the shift cue noticeably. Debug is fine for development:
 
 ```powershell
 .\build\Debug\fh6-hud.exe
@@ -103,7 +105,7 @@ Important defaults:
 - Arrow position: centered horizontally, `200 px` above screen center
 - Arrow opacity: `100%`
 - Arrow duration: `1500 ms`
-- Capture rate limit: `30 FPS`
+- Capture rate limit: `120 FPS`
 - Gear region: dynamic lower-right default, scaled from the captured frame height
 - Diagnostics: disabled
 

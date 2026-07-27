@@ -76,6 +76,36 @@ FrameRegion whiteWidgetOverRedMaskRegion() {  // Begins function whiteWidgetOver
   return FrameRegion(Rect{0, 0, size, size}, std::move(pixels));  // Returns the synthetic false-positive region to the caller.
 }  // Ends the current code block.
 
+FrameRegion redWidgetWithGlowAndPartialRingRegion() {  // Begins function redWidgetWithGlowAndPartialRingRegion.
+  constexpr int size = 160;  // Defines compile-time constant size as 160.
+  constexpr int center = size / 2;  // Defines compile-time constant center as size / 2.
+  constexpr int ringInnerSquared = 36 * 36;  // Defines the squared inner radius of the synthetic gear ring.
+  constexpr int ringOuterSquared = 50 * 50;  // Defines the squared outer radius of the synthetic gear ring.
+  constexpr int digitHalfWidth = 4;  // Defines half the synthetic digit width in pixels.
+  constexpr int digitHalfHeight = 28;  // Defines half the synthetic digit height in pixels.
+  const Color red{216, 26, 52, 255};  // Uses the measured FH6 shift red for the digit, ring, and glow.
+  std::vector<Color> pixels(size * size, Color{10, 10, 10, 255});  // Declares pixels initialized to a dark non-matching background.
+  for (int y = 0; y < size; ++y) {  // Iterates over each synthetic region row.
+    for (int x = 0; x < size; ++x) {  // Iterates over each synthetic region column.
+      const int dx = x - center;  // Sets dx to the horizontal distance from widget center.
+      const int dy = y - center;  // Sets dy to the vertical distance from widget center.
+      const int distanceSquared = dx * dx + dy * dy;  // Sets distanceSquared to the squared distance from widget center.
+      const bool inDigit = dx >= -digitHalfWidth && dx <= digitHalfWidth && dy >= -digitHalfHeight && dy <= digitHalfHeight;  // Sets inDigit when the pixel belongs to the expected gear glyph.
+      const bool inRing = distanceSquared >= ringInnerSquared && distanceSquared <= ringOuterSquared;  // Sets inRing when the pixel belongs to the expected gear circle.
+      if (inDigit) {  // Paints the digit fully solid, as a lit gear glyph would render.
+        pixels[static_cast<std::size_t>(y * size + x)] = red;  // Paints the synthetic digit pixel red.
+      } else if (inRing) {  // Handles pixels belonging to the expected ring band.
+        if ((x + y) % 2 == 0) {  // Paints roughly half the ring band, simulating a thin or anti-aliased ring outline.
+          pixels[static_cast<std::size_t>(y * size + x)] = red;  // Paints the synthetic ring pixel red.
+        }  // Ends the current code block.
+      } else if (distanceSquared > ringOuterSquared && (x + y) % 4 == 0) {  // Handles pixels outside the ring, painting a sparse bloom halo that bleeds into the background sample zone.
+        pixels[static_cast<std::size_t>(y * size + x)] = red;  // Paints the synthetic glow-bleed pixel red.
+      }  // Ends the current code block.
+    }  // Ends the current code block.
+  }  // Ends the current code block.
+  return FrameRegion(Rect{0, 0, size, size}, std::move(pixels));  // Returns the synthetic partial-ring-with-glow-bleed region to the caller.
+}  // Ends the current code block.
+
 }  // Ends the current code block.
 
 FH6_TEST(color_classifier_detects_white) {  // Starts a multi-line initializer or scope for FH6_TEST(color_classifier_detects_white).
@@ -104,6 +134,13 @@ FH6_TEST(color_classifier_detects_glowing_fh_shift_red) {  // Starts a multi-lin
   auto region = widgetRegion(Color{214, 93, 159, 255});  // Sets auto region to a synthetic gear widget using a glowing FH6 red sample.
 
   FH6_REQUIRE(classifier.classify(region) == GearColorState::Red);  // Sets FH6_REQUIRE(classifier.classify(region) to = GearColorState::Red).
+}  // Ends the current code block.
+
+FH6_TEST(color_classifier_detects_red_with_partial_ring_and_glow_bleed) {  // Starts a multi-line initializer or scope for color_classifier_detects_red_with_partial_ring_and_glow_bleed.
+  GearColorClassifier classifier;  // Declares classifier for use in this scope.
+  auto region = redWidgetWithGlowAndPartialRingRegion();  // Sets auto region to a red widget with an anti-aliased ring and bloom bleeding past it.
+
+  FH6_REQUIRE(classifier.classify(region) == GearColorState::Red);  // Requires realistic anti-aliasing and glow bleed to not suppress a genuine red transition.
 }  // Ends the current code block.
 
 FH6_TEST(color_classifier_rejects_sparse_red_without_gear_ring) {  // Starts a multi-line initializer or scope for FH6_TEST(color_classifier_rejects_sparse_red_without_gear_ring).

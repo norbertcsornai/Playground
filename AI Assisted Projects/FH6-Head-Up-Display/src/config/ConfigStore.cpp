@@ -49,6 +49,10 @@ bool isLegacyDefaultArrowDuration(std::chrono::milliseconds duration) {  // Begi
   return duration == std::chrono::milliseconds(250);  // Returns duration == std::chrono::milliseconds(250) to the caller.
 }  // Ends the current code block.
 
+bool isLegacyDefaultCaptureRateLimitFps(int captureRateLimitFps) {  // Begins function isLegacyDefaultCaptureRateLimitFps.
+  return captureRateLimitFps == 30;  // Returns captureRateLimitFps == 30 to the caller.
+}  // Ends the current code block.
+
 }  // Ends the current code block.
 
 ConfigStore::ConfigStore(std::filesystem::path configPath) : configPath_(std::move(configPath)) {}  // Finishes this initializer entry for the surrounding aggregate.
@@ -95,6 +99,10 @@ AppConfig ConfigStore::load() const {  // Implements ConfigStore::load.
 
   if (isLegacyDefaultArrowDuration(config.arrowDuration)) {  // Guards the following work behind the condition isLegacyDefaultArrowDuration(config.arrowDuration).
     config.arrowDuration = std::chrono::milliseconds(1500);  // Sets config.arrowDuration to std::chrono::milliseconds(1500).
+  }  // Ends the current code block.
+
+  if (isLegacyDefaultCaptureRateLimitFps(config.captureRateLimitFps)) {  // Guards the following work behind the condition isLegacyDefaultCaptureRateLimitFps(config.captureRateLimitFps).
+    config.captureRateLimitFps = 120;  // Sets config.captureRateLimitFps to 120.
   }  // Ends the current code block.
 
   if (const auto it = values.find("targetDisplayId"); it != values.end()) {  // Guards the following work behind the condition const auto it = values.find("targetDisplayId"); it != values.end().

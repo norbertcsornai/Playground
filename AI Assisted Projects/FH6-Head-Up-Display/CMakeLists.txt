@@ -24,7 +24,7 @@ add_library(fh6_hud_core
 target_include_directories(fh6_hud_core PUBLIC src)
 
 if(WIN32)
-  target_link_libraries(fh6_hud_core PRIVATE user32 gdi32 dwmapi d3d11 dxgi)
+  target_link_libraries(fh6_hud_core PRIVATE user32 gdi32 dwmapi d3d11 dxgi winmm)
   target_compile_definitions(fh6_hud_core PRIVATE WIN32_LEAN_AND_MEAN NOMINMAX)
 endif()
 

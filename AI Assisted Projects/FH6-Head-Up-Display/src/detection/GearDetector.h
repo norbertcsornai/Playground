@@ -13,6 +13,9 @@ class GearDetector {  // Declares the GearDetector class interface and members.
   GearDetector();  // Invokes GearDetector with the supplied arguments.
 
   void setRegion(const Rect& region);  // Declares function setRegion for callers.
+  // Returns the HUD rect this detector will read on a display of the given size, so the capture
+  // layer can fetch only those pixels instead of the whole screen.
+  [[nodiscard]] Rect gearRegionForDisplay(int width, int height) const;  // Declares gearRegionForDisplay and marks its return value as important.
   [[nodiscard]] GearDetectionResult detectGear(const Frame& frame,  // Supplies [[nodiscard]] GearDetectionResult detectGear(const Frame& frame to the surrounding call or initializer.
                                                const GearColorClassifier& classifier) const;  // Declares const for use in this scope.
 

@@ -14,7 +14,7 @@ struct AppConfig {  // Declares the AppConfig value type and fields.
   std::chrono::milliseconds arrowDuration{1500};  // Declares arrowDuration and initializes it with 1500.
   Size arrowSize{75, 150};  // Declares arrowSize and initializes it with 75, 150.
   std::string targetDisplayId{"primary"};  // Declares targetDisplayId and initializes it with "primary".
-  int captureRateLimitFps{30};  // Declares captureRateLimitFps and initializes it with 30.
+  int captureRateLimitFps{120};  // Declares captureRateLimitFps and initializes it with 120.
   bool diagnosticsEnabled{false};  // Declares diagnosticsEnabled and initializes it with false.
 };  // Ends the current type, struct, or initializer declaration.
 

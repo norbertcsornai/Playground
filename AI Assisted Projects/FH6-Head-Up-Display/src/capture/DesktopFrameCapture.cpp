@@ -2,6 +2,7 @@
 
 #include <algorithm>  // Imports the algorithm standard library declarations used in this file.
 #include <chrono>  // Imports the chrono standard library declarations used in this file.
+#include <cmath>  // Imports the cmath standard library declarations used in this file.
 #include <cstdint>  // Imports the cstdint standard library declarations used in this file.
 #include <limits>  // Imports the limits standard library declarations used in this file.
 #include <vector>  // Imports the vector standard library declarations used in this file.
@@ -56,7 +57,7 @@ struct DesktopFrameCapture::DxgiCaptureState {};  // Declares the DesktopFrameCa
 #endif  // Ends the compile-time selection block.
 
 DesktopFrameCapture::DesktopFrameCapture(int captureRateLimitFps)  // Begins the multi-line constructor definition for DesktopFrameCapture.
-    : captureRateLimitFps_(captureRateLimitFps > 0 ? captureRateLimitFps : 30) {}  // Initializes constructor members with captureRateLimitFps_(captureRateLimitFps > 0 ? captureRateLimitFps : 30).
+    : captureRateLimitFps_(captureRateLimitFps > 0 ? captureRateLimitFps : 120) {}  // Initializes constructor members with captureRateLimitFps_(captureRateLimitFps > 0 ? captureRateLimitFps : 120).
 
 DesktopFrameCapture::~DesktopFrameCapture() {  // Starts a multi-line initializer or scope for DesktopFrameCapture::~DesktopFrameCapture().
   stop();  // Invokes stop with the supplied arguments.
@@ -84,13 +85,22 @@ std::optional<Frame> DesktopFrameCapture::captureFrame() {  // Implements Deskto
   if (lastCapture_ != TimePoint{} && now - lastCapture_ < minInterval) {  // Guards the following work behind the condition lastCapture_ != TimePoint{} && now - lastCapture_ < minInterval.
     return std::nullopt;  // Returns std::nullopt to the caller.
   }  // Ends the current code block.
-  lastCapture_ = now;  // Sets lastCapture_ to now.
 
+  // Only stamp lastCapture_ once a frame is actually obtained. Stamping it unconditionally here
+  // meant a single DXGI WAIT_TIMEOUT (no new compositor frame yet) cost a full extra capture
+  // interval before the next retry, doubling worst-case latency for no reason -- the caller's
+  // poll loop already retries every few milliseconds, faster than the compositor produces frames.
   if (auto frame = captureFrameWithDxgi(now)) {  // Guards the following work behind the condition auto frame = captureFrameWithDxgi(now).
+    lastCapture_ = now;  // Sets lastCapture_ to now.
     return frame;  // Returns frame to the caller.
   }  // Ends the current code block.
 
-  return captureFrameWithGdi(now);  // Returns captureFrameWithGdi(now) to the caller.
+  if (auto frame = captureFrameWithGdi(now)) {  // Guards the following work behind the condition auto frame = captureFrameWithGdi(now).
+    lastCapture_ = now;  // Sets lastCapture_ to now.
+    return frame;  // Returns frame to the caller.
+  }  // Ends the current code block.
+
+  return std::nullopt;  // Returns std::nullopt to the caller.
 }  // Ends the current code block.
 
 void DesktopFrameCapture::stop() {  // Implements DesktopFrameCapture::stop.
@@ -115,6 +125,39 @@ void DesktopFrameCapture::setCaptureRateLimit(int captureRateLimitFps) {  // Imp
   if (captureRateLimitFps > 0) {  // Guards the following work behind the condition captureRateLimitFps > 0.
     captureRateLimitFps_ = captureRateLimitFps;  // Sets captureRateLimitFps_ to captureRateLimitFps.
   }  // Ends the current code block.
+}  // Ends the current code block.
+
+void DesktopFrameCapture::setRegionOfInterest(const Rect& region) {  // Implements DesktopFrameCapture::setRegionOfInterest.
+  regionOfInterest_ = region;  // Sets regionOfInterest_ to region.
+}  // Ends the current code block.
+
+// Returns the rect to capture in display-local coordinates, where {0,0} is the display's top-left
+// corner. This matches the coordinate space CalibrationService produces gear regions in, and the
+// space Frame::origin() is expressed in, so no desktop-origin offset is involved on either side.
+Rect DesktopFrameCapture::resolveCaptureRect() const {  // Implements DesktopFrameCapture::resolveCaptureRect.
+  const Rect fullDisplay{0, 0, display_.bounds.width, display_.bounds.height};  // Declares fullDisplay covering the whole display in display-local coordinates.
+  if (regionOfInterest_.empty()) {  // Guards the following work behind the condition regionOfInterest_.empty().
+    return fullDisplay;  // Returns the whole display when no region of interest was requested.
+  }  // Ends the current code block.
+
+  // Grab a little more than asked for. The consumer recomputes its region from the returned frame's
+  // source dimensions, and any rounding between coordinate spaces could otherwise leave that region
+  // reaching a pixel or two past what was captured. The padding is negligible next to a full screen.
+  constexpr int kPadding = 16;  // Defines compile-time constant kPadding as 16.
+
+  // Intersect the padded region with the display so we never read outside the captured surface.
+  const int left = std::max(regionOfInterest_.x - kPadding, 0);  // Sets const int left to the intersected left edge.
+  const int top = std::max(regionOfInterest_.y - kPadding, 0);  // Sets const int top to the intersected top edge.
+  const int right = std::min(regionOfInterest_.x + regionOfInterest_.width + kPadding,  // Sets const int right to the intersected right edge.
+                             fullDisplay.width);  // Executes fullDisplay.width).
+  const int bottom = std::min(regionOfInterest_.y + regionOfInterest_.height + kPadding,  // Sets const int bottom to the intersected bottom edge.
+                              fullDisplay.height);  // Executes fullDisplay.height).
+
+  if (right <= left || bottom <= top) {  // Guards the following work behind an empty intersection.
+    return fullDisplay;  // Falls back to the whole display when the region does not overlap it.
+  }  // Ends the current code block.
+
+  return Rect{left, top, right - left, bottom - top};  // Returns the intersected capture rect to the caller.
 }  // Ends the current code block.
 
 bool DesktopFrameCapture::initializeDxgiCapture() {  // Implements DesktopFrameCapture::initializeDxgiCapture.
@@ -250,24 +293,60 @@ std::optional<Frame> DesktopFrameCapture::captureFrameWithDxgi(TimePoint timesta
   D3D11_TEXTURE2D_DESC desc{};  // Declares desc with value initialization.
   acquiredTexture->GetDesc(&desc);  // Calls GetDesc through acquiredTexture.
 
+  // resolveCaptureRect() works in the coordinate space of the reported display bounds, which can
+  // differ from the duplicated texture's own pixel grid when DPI virtualization is in play. Scale
+  // into texture space so the copy box addresses the right pixels either way; when the two spaces
+  // already agree (the normal DPI-aware case) both scale factors are exactly 1.
+  const Rect captureRect = resolveCaptureRect();  // Sets const Rect captureRect to resolveCaptureRect().
+  const double scaleX = display_.bounds.width > 0  // Sets const double scaleX to the display-to-texture horizontal ratio.
+                            ? static_cast<double>(desc.Width) / display_.bounds.width  // Supplies the computed ratio when the display width is known.
+                            : 1.0;  // Falls back to an identity ratio when the display width is unknown.
+  const double scaleY = display_.bounds.height > 0  // Sets const double scaleY to the display-to-texture vertical ratio.
+                            ? static_cast<double>(desc.Height) / display_.bounds.height  // Supplies the computed ratio when the display height is known.
+                            : 1.0;  // Falls back to an identity ratio when the display height is unknown.
+
+  const int texWidth = static_cast<int>(desc.Width);  // Sets const int texWidth to the texture width.
+  const int texHeight = static_cast<int>(desc.Height);  // Sets const int texHeight to the texture height.
+  const UINT boxLeft = static_cast<UINT>(  // Sets const UINT boxLeft to the clamped copy-box left edge.
+      std::clamp(static_cast<int>(std::floor(captureRect.x * scaleX)), 0, texWidth));  // Executes std::clamp(static_cast<int>(std::floor(captureRect.x * scaleX)), 0, texWidth)).
+  const UINT boxTop = static_cast<UINT>(  // Sets const UINT boxTop to the clamped copy-box top edge.
+      std::clamp(static_cast<int>(std::floor(captureRect.y * scaleY)), 0, texHeight));  // Executes std::clamp(static_cast<int>(std::floor(captureRect.y * scaleY)), 0, texHeight)).
+  const UINT boxRight = static_cast<UINT>(std::clamp(  // Sets const UINT boxRight to the clamped copy-box right edge.
+      static_cast<int>(std::ceil((captureRect.x + captureRect.width) * scaleX)), 0, texWidth));  // Executes static_cast<int>(std::ceil((captureRect.x + captureRect.width) * scaleX)), 0, texWidth)).
+  const UINT boxBottom = static_cast<UINT>(std::clamp(  // Sets const UINT boxBottom to the clamped copy-box bottom edge.
+      static_cast<int>(std::ceil((captureRect.y + captureRect.height) * scaleY)), 0, texHeight));  // Executes static_cast<int>(std::ceil((captureRect.y + captureRect.height) * scaleY)), 0, texHeight)).
+  if (boxRight <= boxLeft || boxBottom <= boxTop) {  // Guards the following work behind an empty copy box.
+    return std::nullopt;  // Returns std::nullopt to the caller.
+  }  // Ends the current code block.
+
+  const UINT regionWidth = boxRight - boxLeft;  // Sets const UINT regionWidth to the copy box width.
+  const UINT regionHeight = boxBottom - boxTop;  // Sets const UINT regionHeight to the copy box height.
+
   D3D11_TEXTURE2D_DESC stagingDesc = desc;  // Sets D3D11_TEXTURE2D_DESC stagingDesc to desc.
+  stagingDesc.Width = regionWidth;  // Sizes the staging texture to the region instead of the whole output.
+  stagingDesc.Height = regionHeight;  // Sizes the staging texture to the region instead of the whole output.
   stagingDesc.BindFlags = 0;  // Sets stagingDesc.BindFlags to 0.
   stagingDesc.MiscFlags = 0;  // Sets stagingDesc.MiscFlags to 0.
   stagingDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;  // Sets stagingDesc.CPUAccessFlags to D3D11_CPU_ACCESS_READ.
   stagingDesc.Usage = D3D11_USAGE_STAGING;  // Sets stagingDesc.Usage to D3D11_USAGE_STAGING.
 
-  if (!dxgiState_->stagingTexture || dxgiState_->stagingWidth != desc.Width ||  // Guards the following work behind the condition !dxgiState_->stagingTexture || dxgiState_->stagingWidth != desc.Width ||.
-      dxgiState_->stagingHeight != desc.Height) {  // Continues the staging texture size check.
+  if (!dxgiState_->stagingTexture || dxgiState_->stagingWidth != regionWidth ||  // Guards the following work behind a staging texture that does not match the region.
+      dxgiState_->stagingHeight != regionHeight) {  // Continues the staging texture size check.
+    dxgiState_->stagingTexture.Reset();  // Releases the previous staging texture before resizing.
     hr = dxgiState_->device->CreateTexture2D(&stagingDesc, nullptr, &dxgiState_->stagingTexture);  // Sets hr to dxgiState_->device->CreateTexture2D(&stagingDesc, nullptr, &dxgiState_->stagingTexture).
     if (FAILED(hr)) {  // Guards the following work behind the condition FAILED(hr).
       return std::nullopt;  // Returns std::nullopt to the caller.
     }  // Ends the current code block.
-    dxgiState_->stagingWidth = desc.Width;  // Sets dxgiState_->stagingWidth to desc.Width.
-    dxgiState_->stagingHeight = desc.Height;  // Sets dxgiState_->stagingHeight to desc.Height.
+    dxgiState_->stagingWidth = regionWidth;  // Sets dxgiState_->stagingWidth to regionWidth.
+    dxgiState_->stagingHeight = regionHeight;  // Sets dxgiState_->stagingHeight to regionHeight.
   }  // Ends the current code block.
 
+  // Copying only the region keeps GPU-to-CPU traffic proportional to the HUD area rather than to
+  // the whole screen, which dominates per-frame cost at high resolutions.
+  const D3D11_BOX sourceBox{boxLeft, boxTop, 0, boxRight, boxBottom, 1};  // Declares sourceBox describing the region to copy.
   auto* stagingTexture = dxgiState_->stagingTexture.Get();  // Sets auto* stagingTexture to dxgiState_->stagingTexture.Get().
-  dxgiState_->context->CopyResource(stagingTexture, acquiredTexture.Get());  // Executes dxgiState_->context->CopyResource(stagingTexture, acquiredTexture.Get()).
+  dxgiState_->context->CopySubresourceRegion(stagingTexture, 0, 0, 0, 0, acquiredTexture.Get(), 0,  // Supplies the destination and source arguments for the region copy.
+                                             &sourceBox);  // Executes &sourceBox).
 
   D3D11_MAPPED_SUBRESOURCE mapped{};  // Declares mapped with value initialization.
   hr = dxgiState_->context->Map(stagingTexture, 0, D3D11_MAP_READ, 0, &mapped);  // Sets hr to dxgiState_->context->Map(stagingTexture, 0, D3D11_MAP_READ, 0, &mapped).
@@ -275,21 +354,24 @@ std::optional<Frame> DesktopFrameCapture::captureFrameWithDxgi(TimePoint timesta
     return std::nullopt;  // Returns std::nullopt to the caller.
   }  // Ends the current code block.
 
-  std::vector<Color> pixels;  // Declares pixels for use in this scope.
-  pixels.reserve(static_cast<std::size_t>(desc.Width * desc.Height));  // Calls reserve on pixels.
+  std::vector<Color> pixels(static_cast<std::size_t>(regionWidth) * regionHeight);  // Sizes the pixel buffer up front so the loop can write by index.
 
   const auto* rows = static_cast<const std::uint8_t*>(mapped.pData);  // Sets const auto* rows to static_cast<const std::uint8_t*>(mapped.pData).
-  for (UINT y = 0; y < desc.Height; ++y) {  // Iterates with loop control UINT y = 0; y < desc.Height; ++y.
+  for (UINT y = 0; y < regionHeight; ++y) {  // Iterates with loop control UINT y = 0; y < regionHeight; ++y.
     const auto* row = rows + static_cast<std::size_t>(y) * mapped.RowPitch;  // Sets const auto* row to rows + static_cast<std::size_t>(y) * mapped.RowPitch.
-    for (UINT x = 0; x < desc.Width; ++x) {  // Iterates with loop control UINT x = 0; x < desc.Width; ++x.
+    auto* destination = pixels.data() + static_cast<std::size_t>(y) * regionWidth;  // Sets auto* destination to this row's first output pixel.
+    for (UINT x = 0; x < regionWidth; ++x) {  // Iterates with loop control UINT x = 0; x < regionWidth; ++x.
       const auto* bgra = row + static_cast<std::size_t>(x) * 4;  // Sets const auto* bgra to row + static_cast<std::size_t>(x) * 4.
-      pixels.push_back(Color{bgra[2], bgra[1], bgra[0], bgra[3]});  // Calls push_back on pixels.
+      destination[x] = Color{bgra[2], bgra[1], bgra[0], bgra[3]};  // Sets destination[x] to the converted RGBA pixel.
     }  // Ends the current code block.
   }  // Ends the current code block.
 
   dxgiState_->context->Unmap(stagingTexture, 0);  // Executes dxgiState_->context->Unmap(stagingTexture, 0).
-  return Frame(static_cast<int>(desc.Width), static_cast<int>(desc.Height), std::move(pixels),  // Supplies return Frame(static_cast<int>(desc.Width), static_cast<int>(desc.Height), std::move(pix... to the surrounding call or initializer.
-               timestamp);  // Executes timestamp).
+
+  const Rect origin{static_cast<int>(boxLeft), static_cast<int>(boxTop),  // Declares origin describing where these pixels sit in display-local coordinates.
+                    static_cast<int>(regionWidth), static_cast<int>(regionHeight)};  // Finishes this initializer entry for the surrounding aggregate.
+  return Frame(origin, static_cast<int>(desc.Width), static_cast<int>(desc.Height),  // Supplies the sub-rectangle and full display size to the Frame constructor.
+               std::move(pixels), timestamp);  // Returns the captured sub-rectangle frame to the caller.
 #endif  // Ends the compile-time selection block.
 }  // Ends the current code block.
 
@@ -298,8 +380,15 @@ std::optional<Frame> DesktopFrameCapture::captureFrameWithGdi(TimePoint timestam
   (void)timestamp;  // Marks timestamp as intentionally unused in this build path.
   return std::nullopt;  // Returns std::nullopt to the caller.
 #else  // Selects this compile-time branch when earlier branches were not selected.
-  const int width = display_.bounds.width;  // Sets const int width to display_.bounds.width.
-  const int height = display_.bounds.height;  // Sets const int height to display_.bounds.height.
+  if (display_.bounds.width <= 0 || display_.bounds.height <= 0) {  // Guards the following work behind an empty display.
+    return std::nullopt;  // Returns std::nullopt to the caller.
+  }  // Ends the current code block.
+
+  // Blit only the region of interest so this fallback path also scales with HUD area rather than
+  // with screen area. captureRect is display-local, so offset by the display's desktop origin.
+  const Rect captureRect = resolveCaptureRect();  // Sets const Rect captureRect to resolveCaptureRect().
+  const int width = captureRect.width;  // Sets const int width to captureRect.width.
+  const int height = captureRect.height;  // Sets const int height to captureRect.height.
   if (width <= 0 || height <= 0) {  // Guards the following work behind the condition width <= 0 || height <= 0.
     return std::nullopt;  // Returns std::nullopt to the caller.
   }  // Ends the current code block.
@@ -309,8 +398,9 @@ std::optional<Frame> DesktopFrameCapture::captureFrameWithGdi(TimePoint timestam
   HBITMAP bitmap = CreateCompatibleBitmap(screenDc, width, height);  // Sets HBITMAP bitmap to CreateCompatibleBitmap(screenDc, width, height).
   HGDIOBJ oldBitmap = SelectObject(memoryDc, bitmap);  // Sets HGDIOBJ oldBitmap to SelectObject(memoryDc, bitmap).
 
-  const BOOL copied = BitBlt(memoryDc, 0, 0, width, height, screenDc, display_.bounds.x,  // Supplies const BOOL copied = BitBlt(memoryDc, 0, 0, width, height, screenDc, display_.bounds.x to the surrounding call or initializer.
-                            display_.bounds.y, SRCCOPY);  // Executes display_.bounds.y, SRCCOPY).
+  const BOOL copied = BitBlt(memoryDc, 0, 0, width, height, screenDc,  // Supplies the destination and source device contexts for the blit.
+                             display_.bounds.x + captureRect.x,  // Supplies the desktop-space source column to the surrounding call.
+                             display_.bounds.y + captureRect.y, SRCCOPY);  // Executes display_.bounds.y + captureRect.y, SRCCOPY).
 
   BITMAPINFO bitmapInfo{};  // Declares bitmapInfo with value initialization.
   bitmapInfo.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);  // Sets bitmapInfo.bmiHeader.biSize to sizeof(BITMAPINFOHEADER).
@@ -334,13 +424,14 @@ std::optional<Frame> DesktopFrameCapture::captureFrameWithGdi(TimePoint timestam
     return std::nullopt;  // Returns std::nullopt to the caller.
   }  // Ends the current code block.
 
-  std::vector<Color> pixels;  // Declares pixels for use in this scope.
-  pixels.reserve(static_cast<std::size_t>(width * height));  // Calls reserve on pixels.
-  for (std::size_t i = 0; i < raw.size(); i += 4) {  // Iterates with loop control std::size_t i = 0; i < raw.size(); i += 4.
-    pixels.push_back(Color{raw[i + 2], raw[i + 1], raw[i], raw[i + 3]});  // Calls push_back on pixels.
+  std::vector<Color> pixels(static_cast<std::size_t>(width) * height);  // Sizes the pixel buffer up front so the loop can write by index.
+  for (std::size_t i = 0; i < pixels.size(); ++i) {  // Iterates over each destination pixel.
+    const std::size_t offset = i * 4;  // Sets const std::size_t offset to this pixel's byte offset in the raw buffer.
+    pixels[i] = Color{raw[offset + 2], raw[offset + 1], raw[offset], raw[offset + 3]};  // Sets pixels[i] to the converted RGBA pixel.
   }  // Ends the current code block.
 
-  return Frame(width, height, std::move(pixels), timestamp);  // Returns Frame(width, height, std::move(pixels), timestamp) to the caller.
+  return Frame(Rect{captureRect.x, captureRect.y, width, height}, display_.bounds.width,  // Supplies the sub-rectangle and full display size to the Frame constructor.
+               display_.bounds.height, std::move(pixels), timestamp);  // Returns the captured sub-rectangle frame to the caller.
 #endif  // Ends the compile-time selection block.
 }  // Ends the current code block.
 
