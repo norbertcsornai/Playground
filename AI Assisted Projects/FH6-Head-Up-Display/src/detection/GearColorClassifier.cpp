@@ -136,7 +136,21 @@ bool GearColorClassifier::hasRedGearAndRing(const WidgetMatchStats& stats, int s
 
 bool GearColorClassifier::hasWhiteGearSignal(const WidgetMatchStats& stats, int side) const {  // Implements GearColorClassifier::hasWhiteGearSignal.
   const int minimumInnerPixels = std::max(24, side);  // Sets const int minimumInnerPixels to std::max(24, side).
-  return stats.innerCount >= minimumInnerPixels;  // Returns stats.innerCount >= minimumInnerPixels to the caller.
+  if (stats.innerCount < minimumInnerPixels) {  // Guards the following work behind weak white gear evidence.
+    return false;  // Returns false to the caller.
+  }  // Ends the current code block.
+  if (stats.backgroundPixels <= 0) {  // Guards the following work behind the condition stats.backgroundPixels <= 0.
+    return true;  // Returns true to the caller.
+  }  // Ends the current code block.
+
+  // White scenery behind the HUD (a wall, sky, or snow) floods the inner zone and would otherwise
+  // read as a white gear, outranking a genuinely red one because white is tested first. Apply the
+  // same background rejection used for red: if white saturates the area outside the widget about as
+  // much as it does the gear itself, it is the scene showing through, not the gear glyph.
+  const double innerRatio = static_cast<double>(stats.innerCount) / static_cast<double>(stats.innerPixels);  // Sets const double innerRatio to the white share inside the expected gear.
+  const double backgroundRatio = static_cast<double>(stats.backgroundCount) / static_cast<double>(stats.backgroundPixels);  // Sets const double backgroundRatio to the white share outside the expected gear mask.
+  const bool whiteLooksLikeBackground = backgroundRatio > 0.5 && backgroundRatio > innerRatio * 0.75;  // Sets const bool whiteLooksLikeBackground to the broad-background-white rejection check.
+  return !whiteLooksLikeBackground;  // Returns whether the white shape looks like the gear widget instead of the background.
 }  // Ends the current code block.
 
 }  // Ends the current code block.

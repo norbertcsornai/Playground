@@ -74,6 +74,16 @@ void HudApplication::run() {  // Implements HudApplication::run.
 #endif  // Ends the compile-time selection block.
 
   while (running_) {  // Repeats while running_ remains true.
+#ifdef _WIN32  // Keeps the following code only when _WIN32 is defined.
+    // The overlay window lives on this thread, so its messages have to be drained here. Without a
+    // pump the paint handler never runs and Windows eventually treats the window as unresponsive.
+    MSG message;  // Declares message for use in this scope.
+    while (PeekMessageA(&message, nullptr, 0, 0, PM_REMOVE)) {  // Repeats while a queued message is available.
+      TranslateMessage(&message);  // Invokes TranslateMessage with the supplied arguments.
+      DispatchMessageA(&message);  // Invokes DispatchMessageA with the supplied arguments.
+    }  // Ends the current code block.
+#endif  // Ends the compile-time selection block.
+
     processFrame();  // Invokes processFrame with the supplied arguments.
     std::this_thread::sleep_for(std::chrono::milliseconds(1));  // Executes std::this_thread::sleep_for(std::chrono::milliseconds(1)).
   }  // Ends the current code block.
@@ -96,10 +106,17 @@ void HudApplication::shutdown() {  // Implements HudApplication::shutdown.
 }  // Ends the current code block.
 
 void HudApplication::processFrame() {  // Implements HudApplication::processFrame.
-  // Scans all top-level windows once per frame; isGameVisible()/getActiveDisplay() below reuse
-  // this instead of each triggering their own scan, which used to run EnumWindows 2-3 times per
-  // frame and ate into the per-frame time budget at high poll rates.
-  gameWindowTracker_.refresh();  // Invokes refresh with the supplied arguments.
+  // refresh() enumerates every top-level window and reads each one's title, which is far too
+  // expensive to repeat on every pass of a millisecond loop -- doing so measurably steals time from
+  // the foreground game. The game's window does not change identity at that rate, so rescan only
+  // periodically, or immediately while no window is known yet so startup still latches on quickly.
+  // The cheap per-pass checks below reuse the cached handle, so alt-tab is still noticed at once.
+  const auto now = Clock::now();  // Sets const auto now to Clock::now().
+  if (!gameWindowTracker_.isGameRunning() || now - lastWindowScan_ >= kWindowScanInterval) {  // Guards the rescan behind a missing window or an elapsed interval.
+    gameWindowTracker_.refresh();  // Invokes refresh with the supplied arguments.
+    lastWindowScan_ = now;  // Sets lastWindowScan_ to now.
+  }  // Ends the current code block.
+
   if (!gameWindowTracker_.isGameVisible()) {  // Guards the following work behind the condition !gameWindowTracker_.isGameVisible().
     diagnostics_.reportGameDetected(false);  // Calls reportGameDetected on diagnostics_.
     enterIdleMode();  // Invokes enterIdleMode with the supplied arguments.

@@ -1,6 +1,7 @@
 #pragma once  // Prevents this header from being included more than once.
 
 #include <atomic>  // Imports the atomic standard library declarations used in this file.
+#include <chrono>  // Imports the chrono standard library declarations used in this file.
 #include <memory>  // Imports the memory standard library declarations used in this file.
 
 #include "alert/ShiftAlertController.h"  // Imports project declarations from alert/ShiftAlertController.h.
@@ -31,8 +32,13 @@ class HudApplication {  // Declares the HudApplication class interface and membe
   void enterIdleMode();  // Declares function enterIdleMode for callers.
   void ensureCaptureForActiveDisplay();  // Declares function ensureCaptureForActiveDisplay for callers.
 
+  // How often the expensive top-level window scan may run. Short enough that the game is picked up
+  // promptly after launch, long enough that the scan is not a per-frame cost.
+  static constexpr std::chrono::milliseconds kWindowScanInterval{250};  // Defines the minimum gap between window scans.
+
   std::atomic_bool running_{false};  // Declares running_ and initializes it with false.
   TimePoint lastFrameTime_{};  // Declares lastFrameTime_ with value initialization.
+  TimePoint lastWindowScan_{};  // Declares when the top-level window scan last ran.
   AppConfig config_{};  // Declares config_ with value initialization.
   ConfigStore configStore_{};  // Declares configStore_ with value initialization.
   GameWindowTracker gameWindowTracker_{};  // Declares gameWindowTracker_ with value initialization.

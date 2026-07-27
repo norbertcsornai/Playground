@@ -143,6 +143,15 @@ FH6_TEST(color_classifier_detects_red_with_partial_ring_and_glow_bleed) {  // St
   FH6_REQUIRE(classifier.classify(region) == GearColorState::Red);  // Requires realistic anti-aliasing and glow bleed to not suppress a genuine red transition.
 }  // Ends the current code block.
 
+FH6_TEST(color_classifier_detects_red_gear_over_white_background) {  // Starts a multi-line initializer or scope for color_classifier_detects_red_gear_over_white_background.
+  // A red gear widget drawn over bright scenery (a white wall, sky, or snow). The white flooding
+  // the region must not outrank the red widget, or the shift cue never fires against pale scenery.
+  auto region = widgetRegion(Color{216, 26, 52, 255}, Color{235, 235, 230, 255});  // Sets auto region to a red gear widget over a white background.
+  GearColorClassifier classifier;  // Declares classifier for use in this scope.
+
+  FH6_REQUIRE(classifier.classify(region) == GearColorState::Red);  // Requires the red gear to win over bright background scenery.
+}  // Ends the current code block.
+
 FH6_TEST(color_classifier_rejects_sparse_red_without_gear_ring) {  // Starts a multi-line initializer or scope for FH6_TEST(color_classifier_rejects_sparse_red_without_gear_ring).
   GearColorClassifier classifier;  // Declares classifier for use in this scope.
   auto region = sparseRegionWithGlyph(Color{214, 93, 159, 255});  // Sets auto region to sparseRegionWithGlyph(Color{214, 93, 159, 255}).

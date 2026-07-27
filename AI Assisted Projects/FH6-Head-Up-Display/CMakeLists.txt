@@ -40,6 +40,7 @@ add_executable(fh6-hud-tests
   tests/config/ConfigStoreTests.cpp
   tests/detection/GearColorClassifierTests.cpp
   tests/detection/GearDetectorTests.cpp
+  tests/overlay/OverlayWindowTests.cpp
 )
 
 target_link_libraries(fh6-hud-tests PRIVATE fh6_hud_core)
