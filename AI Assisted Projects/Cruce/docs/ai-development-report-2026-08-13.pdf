@@ -1,0 +1,318 @@
+%PDF-1.4
+%Cruce AI report
+1 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+2 0 obj
+<< /Length 3770 >>
+stream
+BT
+/F1 10 Tf
+54 744 Td
+12 TL
+/F1 12 Tf
+(CRUCE AI DEVELOPMENT REPORT) Tj
+/F1 10 Tf
+T*
+(Date: August 13, 2026) Tj
+T*
+(Repository: D:\\Projects\\Playground\\AI Assisted Projects\\Cruce) Tj
+T*
+() Tj
+T*
+/F1 12 Tf
+(SUMMARY) Tj
+/F1 10 Tf
+T*
+(Today I added and evolved the Cruce AI from simple legal-action automation into a data-) Tj
+T*
+(generating, trainable, and playable AI pipeline. The current playable bots are available) Tj
+T*
+(in the lobby as ai_bot_1 through ai_bot_4. They can be invited to 2-, 3-, or 4-player) Tj
+T*
+(games, accept invitations automatically, select target scores when chosen, bid, choose) Tj
+T*
+(trump, play legal cards, and accept rematches.) Tj
+T*
+() Tj
+T*
+/F1 12 Tf
+(CURRENT AI COMPONENTS) Tj
+/F1 10 Tf
+T*
+(1. Live playable bot, C++: implemented in src/app/server_main.cpp. This is the AI used) Tj
+T*
+(by the server when players invite ai_bot_1 through ai_bot_4.) Tj
+T*
+(2. Move database: JSONL event records are appended to data/game_events.db. Match) Tj
+T*
+(summaries are appended to data/match_history.db.) Tj
+T*
+(3. Training export: tools/export_training_data.py converts logged events into bid,) Tj
+T*
+(trump, and card-play datasets under data/ai/.) Tj
+T*
+(4. Model code: src/ai/model.py contains a dependency-free sparse perceptron.) Tj
+T*
+(src/ai/train.py trains models. src/ai/policy.py loads trained models and chooses) Tj
+T*
+(actions.) Tj
+T*
+(5. Model-guided self-play: tools/ai_self_play.py runs games through the normal HTTP API) Tj
+T*
+(using trained models.) Tj
+T*
+() Tj
+T*
+/F1 12 Tf
+(STEPS COMPLETED TODAY) Tj
+/F1 10 Tf
+T*
+(1. Added persistent AI training logs. Every important game action can be saved with) Tj
+T*
+(actor, request, result, match id, private state before the action, and private state) Tj
+T*
+(after the action. This makes the game history usable later for supervised learning and) Tj
+T*
+(reinforcement-learning experiments.) Tj
+T*
+(2. Added match-history persistence. Completed matches are summarized with players,) Tj
+T*
+(winner, target score, final score, and round count in data/match_history.db.) Tj
+T*
+(3. Added server self-play. The executable supports commands such as) Tj
+T*
+(build\\Debug\\cruce_server_app.exe --self-play 500 --players 2 --target 6 --seed 20260814.) Tj
+T*
+(This creates valid bot-vs-bot games without opening any client.) Tj
+T*
+(4. Generated self-play data. Earlier batches generated 500 games for each player mode) Tj
+T*
+(with the initial valid-action bot. Today I also completed a stronger 2-player batch: 500) Tj
+T*
+(games, 0 failures, 38,381 actions logged. A later 3-player generation was interrupted by) Tj
+T*
+(the user request for this PDF, so I stopped the remaining generator process.) Tj
+T*
+(5. Exported training examples. The exporter maps bid, trump, and card-play actions into) Tj
+T*
+(separate JSONL datasets. Card examples include legalCardIds as a mask so the model) Tj
+T*
+(cannot choose impossible cards.) Tj
+T*
+(6. Trained baseline models. Models were trained into versioned folders under) Tj
+T*
+(data/ai/models/, including v1 and v2. These are lightweight sparse linear classifiers) Tj
+T*
+(that run without third-party Python packages.) Tj
+T*
+(7. Added a playable AI path. Built-in bot users ai_bot_1 through ai_bot_4 are always) Tj
+T*
+(visible as online Bot players. Human users can invite them from the lobby and play) Tj
+T*
+(complete matches.) Tj
+T*
+(8. Improved the live heuristic bot. The previous bot mostly bid 1, chose the strongest-) Tj
+T*
+(looking suit, led high, and otherwise played low. The improved bot now evaluates hand) Tj
+T*
+(strength, high cards, marriage announcements, trump potential, target score pressure,) Tj
+T*
+(current trick value, whether its own team is already winning the trick, and whether a) Tj
+T*
+(legal card can capture the trick.) Tj
+ET
+endstream
+endobj
+3 0 obj
+<< /Type /Page /Parent 8 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R >> >> /Contents 2 0 R >>
+endobj
+4 0 obj
+<< /Length 3259 >>
+stream
+BT
+/F1 10 Tf
+54 744 Td
+12 TL
+(9. Improved 4-player team behavior. In team games, the bot now checks ownership, avoids) Tj
+T*
+(unnecessarily overtaking a partner, and can feed points to a partner who is already) Tj
+T*
+(winning the trick.) Tj
+T*
+(10. Improved announcement awareness. The bot values King-Queen pairs and favors playing) Tj
+T*
+(one card from the pair when it creates 20 or 40 announcement points.) Tj
+T*
+(11. Improved target selection. AI-selected match targets are no longer always 6 points.) Tj
+T*
+(Bot target selection now varies among 6, 11, and 21.) Tj
+T*
+(12. Enriched model features. src/ai/features.py now includes trick points, current) Tj
+T*
+(winner ownership, legal cards that can win, legal cards that feed the same side,) Tj
+T*
+(announcement opportunities, likely trump candidate, and more state context.) Tj
+T*
+() Tj
+T*
+/F1 12 Tf
+(VALIDATION RUN TODAY) Tj
+/F1 10 Tf
+T*
+(- cmake --build build: passed after fixing Windows min/max macro collisions.) Tj
+T*
+(- ctest --test-dir build -C Debug --output-on-failure: 7 of 7 tests passed.) Tj
+T*
+(- Stronger 2-player self-play: 500 of 500 games completed, 0 failed, 38,381 actions) Tj
+T*
+(logged.) Tj
+T*
+(- Stopped interrupted self-play process PID 20212 before writing this report.) Tj
+T*
+() Tj
+T*
+/F1 12 Tf
+(CURRENT DATA COUNTS) Tj
+/F1 10 Tf
+T*
+(- data/game_events.db: 266,922 logged event rows.) Tj
+T*
+(- data/match_history.db: 2,536 match-history rows.) Tj
+T*
+() Tj
+T*
+/F1 12 Tf
+(TRAINED MODEL METRICS AVAILABLE NOW) Tj
+/F1 10 Tf
+T*
+(Version v1:) Tj
+T*
+(- Bid model: train 17,659 examples, eval 4,423 examples, eval accuracy 0.9989.) Tj
+T*
+(- Trump model: train 5,750 examples, eval 1,442 examples, eval accuracy 0.9452.) Tj
+T*
+(- Card model: train 138,000 examples, eval 34,608 examples, eval accuracy 0.7271.) Tj
+T*
+() Tj
+T*
+(Version v2:) Tj
+T*
+(- Bid model: train 17,741 examples, eval 4,439 examples, eval accuracy 0.9991.) Tj
+T*
+(- Trump model: train 5,791 examples, eval 1,450 examples, eval accuracy 0.9310.) Tj
+T*
+(- Card model: train 138,984 examples, eval 34,800 examples, eval accuracy 0.7595.) Tj
+T*
+() Tj
+T*
+/F1 12 Tf
+(IMPORTANT NOTE ABOUT CURRENT STATE) Tj
+/F1 10 Tf
+T*
+(The live playable bots now use the improved C++ heuristic. The already-saved v1 and v2) Tj
+T*
+(Python models were trained before the final stronger-heuristic pass in this session. The) Tj
+T*
+(stronger 2-player self-play data has been appended to the database, but the full) Tj
+T*
+(stronger 3-player and 4-player batches plus a new v3 retraining pass were interrupted by) Tj
+T*
+(the request to create this PDF.) Tj
+T*
+() Tj
+T*
+/F1 12 Tf
+(RECOMMENDED NEXT COMMANDS) Tj
+/F1 10 Tf
+T*
+(1. Finish stronger self-play data for all modes:) Tj
+T*
+(   build\\Debug\\cruce_server_app.exe --self-play 500 --players 3 --target 6 --seed) Tj
+T*
+(20260815) Tj
+T*
+(   build\\Debug\\cruce_server_app.exe --self-play 500 --players 4 --target 6 --seed) Tj
+T*
+(20260816) Tj
+T*
+(2. Export the updated datasets:) Tj
+T*
+(   python tools/export_training_data.py --include-real) Tj
+T*
+(3. Train the next model version:) Tj
+T*
+(   python src/ai/train.py --data data/ai --models data/ai/models/v3 --epochs 5) Tj
+T*
+(4. Compare model versions:) Tj
+T*
+(   python tools/compare_ai_models.py data/ai/models/v2 data/ai/models/v3) Tj
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Page /Parent 8 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R >> >> /Contents 4 0 R >>
+endobj
+6 0 obj
+<< /Length 846 >>
+stream
+BT
+/F1 10 Tf
+54 744 Td
+12 TL
+() Tj
+T*
+/F1 12 Tf
+(FILES MOST RELEVANT TO THE CURRENT AI) Tj
+/F1 10 Tf
+T*
+(- src/app/server_main.cpp: live bots, self-play simulator, action logging, HTTP app) Tj
+T*
+(endpoints.) Tj
+T*
+(- tools/export_training_data.py: converts move logs to model datasets.) Tj
+T*
+(- src/ai/features.py: feature extraction and legal card mask helpers.) Tj
+T*
+(- src/ai/model.py: sparse perceptron implementation.) Tj
+T*
+(- src/ai/train.py: model training and metrics output.) Tj
+T*
+(- src/ai/policy.py: model inference for bid, trump, and card play.) Tj
+T*
+(- tools/ai_self_play.py: trained-model self-play through the server API.) Tj
+T*
+(- tests/python/ai_bot_smoke.py: verifies that a human can invite and finish a match) Tj
+T*
+(against a bot.) Tj
+T*
+(- README.md: documents AI data generation, training, and usage commands.) Tj
+ET
+endstream
+endobj
+7 0 obj
+<< /Type /Page /Parent 8 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R >> >> /Contents 6 0 R >>
+endobj
+8 0 obj
+<< /Type /Pages /Count 3 /Kids [3 0 R 5 0 R 7 0 R] >>
+endobj
+9 0 obj
+<< /Type /Catalog /Pages 8 0 R >>
+endobj
+xref
+0 10
+0000000000 65535 f 
+0000000026 00000 n 
+0000000096 00000 n 
+0000003918 00000 n 
+0000004044 00000 n 
+0000007355 00000 n 
+0000007481 00000 n 
+0000008378 00000 n 
+0000008504 00000 n 
+0000008573 00000 n 
+trailer
+<< /Size 10 /Root 9 0 R >>
+startxref
+8622
+%%EOF

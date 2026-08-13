@@ -1,0 +1,246 @@
+@startuml
+title Cruce - Beginner-Friendly Class Diagram
+
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+package "Client Applications" {
+  abstract class ClientApp {
+    +connect(roomCode)
+    +renderPublicState(state)
+    +renderOwnHand(cards)
+    +sendBid(value)
+    +sendCard(cardId)
+  }
+
+  class MobileClient
+  class WindowsDesktopClient
+  class WebClient
+
+  ClientApp <|-- MobileClient
+  ClientApp <|-- WindowsDesktopClient
+  ClientApp <|-- WebClient
+}
+
+package "Server" {
+  class GameServer {
+    +createRoom(playerCount, targetScore)
+    +joinRoom(roomCode, player)
+    +reconnectPlayer(playerId)
+    +submitBid(playerId, bidValue)
+    +submitCardPlay(playerId, cardId)
+    +broadcastState(matchId)
+  }
+
+  class Room {
+    -roomCode
+    -playerCount
+    -targetScore
+    +addPlayer(player)
+    +removePlayer(playerId)
+    +canStartMatch()
+    +startMatch()
+  }
+
+  class PrivacyFilter {
+    +publicState(match)
+    +privateStateFor(match, playerId)
+  }
+
+  class GameRepository {
+    +saveMatch(match)
+    +saveRoundResult(roundResult)
+    +loadActiveMatch(matchId)
+    +saveCompletedMatch(matchRecord)
+  }
+}
+
+package "Core Game Domain" {
+  class Match {
+    -matchId
+    -targetScore
+    -dealerSeat
+    -status
+    +startRound()
+    +applyBid(playerId, bidValue)
+    +chooseTrump(playerId, suit)
+    +playCard(playerId, cardId)
+    +finishRound()
+    +isComplete()
+  }
+
+  class Round {
+    -roundNumber
+    -trumpSuit
+    -bidWinner
+    +dealCards()
+    +startBidding()
+    +startFirstTrick()
+    +completeTrick()
+    +calculateResult()
+  }
+
+  class Player {
+    -playerId
+    -displayName
+    -platform
+    -seatIndex
+    +receiveCards(cards)
+    +hasCard(cardId)
+  }
+
+  class Team {
+    -teamId
+    +contains(playerId)
+    +roundPoints()
+  }
+
+  class Deck {
+    -cards
+    +shuffle()
+    +deal(count)
+    +draw()
+    +isEmpty()
+  }
+
+  class Card {
+    -cardId
+    -suit
+    -rank
+    +pointValue()
+    +beats(other, ledSuit, trumpSuit)
+  }
+
+  class Trick {
+    -leaderSeat
+    -playedCards
+    +addCard(playerId, card)
+    +winner(ledSuit, trumpSuit)
+    +points()
+  }
+
+  class Bid {
+    -playerId
+    -value
+    -passed
+    +isHigherThan(otherBid)
+  }
+
+  class Announcement {
+    -playerId
+    -suit
+    +points(trumpSuit)
+  }
+
+  class ScoreBoard {
+    -matchPointsByOwner
+    +addRoundScore(ownerId, points)
+    +applyFailedBid(ownerId, bidValue)
+    +leader()
+    +hasWinner(targetScore)
+  }
+
+  class RulesEngine {
+    +createDeck()
+    +validateBid(round, playerId, bidValue)
+    +validateCardPlay(round, playerId, card)
+    +resolveTrick(trick, trumpSuit)
+    +scoreRound(round)
+  }
+
+  enum Suit {
+    Hearts
+    Diamonds
+    Clubs
+    Spades
+  }
+
+  enum Rank {
+    Ace
+    Ten
+    King
+    Queen
+    Jack
+    Nine
+  }
+
+  enum ClientPlatform {
+    Mobile
+    WindowsDesktop
+    Web
+    Bot
+  }
+}
+
+package "Persistence Records" {
+  class MatchRecord {
+    -matchId
+    -participants
+    -teams
+    -targetScore
+    -finalScore
+    -winnerId
+    -startedAt
+    -finishedAt
+  }
+
+  class RoundResult {
+    -roundNumber
+    -bidWinner
+    -bidValue
+    -trumpSuit
+    -pointsByOwner
+  }
+}
+
+ClientApp --> GameServer : WebSocket messages
+GameServer o-- Room
+GameServer --> PrivacyFilter : hides other hands
+GameServer --> GameRepository : persists state
+GameServer --> Match : owns active matches
+
+Room --> Player : seats 2, 3, or 4
+Room --> Match : starts
+
+Match *-- Round
+Match *-- ScoreBoard
+Match o-- Player
+Match o-- Team : only required for 4 players
+Match --> RulesEngine : validates actions
+
+Round *-- Deck
+Round *-- Trick
+Round o-- Bid
+Round o-- Announcement
+Deck *-- Card
+Trick o-- Card
+Player o-- Card : own hand only
+Team o-- Player : opposite seats
+
+Card --> Suit
+Card --> Rank
+Player --> ClientPlatform
+
+GameRepository --> MatchRecord
+GameRepository --> RoundResult
+MatchRecord o-- RoundResult
+
+note right of PrivacyFilter
+  Each client receives:
+  - public table state
+  - only that player's hand
+end note
+
+note bottom of ScoreBoard
+  Target score is selected per room:
+  6, 11, or 21 points.
+  Ties at or above target continue.
+end note
+
+note bottom of RulesEngine
+  Keep rules in shared C++ so server,
+  tests, and WebAssembly can reuse them.
+end note
+
+@enduml

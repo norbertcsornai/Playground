@@ -1,0 +1,22 @@
+build/
+out/
+android/.gradle/
+android/.idea/
+android/app/build/
+android/local.properties
+tmp-gradle-user/
+.vscode/
+
+*.user
+*.suo
+*.vcxproj.user
+
+__pycache__/
+*.pyc
+
+# Local runtime state and generated AI datasets.
+data/game_events.db
+data/match_history.db
+data/users.db
+data/windows_session.txt
+data/ai/*.jsonl
